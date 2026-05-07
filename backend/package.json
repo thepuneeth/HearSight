@@ -1,0 +1,15 @@
+{
+  "name": "hearsight-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Personal prototype backend for generating route familiarity walkthroughs.",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "HEARSIGHT_USE_MOCKS=true node --watch src/index.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

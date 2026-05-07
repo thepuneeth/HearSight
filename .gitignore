@@ -1,0 +1,11 @@
+.DS_Store
+backend/.env
+backend/node_modules/
+backend/coverage/
+
+# Xcode local state
+ios/*.xcworkspace/
+ios/*.xcodeproj/xcuserdata/
+ios/*.xcodeproj/project.xcworkspace/xcuserdata/
+ios/DerivedData/
+*.xcuserstate
