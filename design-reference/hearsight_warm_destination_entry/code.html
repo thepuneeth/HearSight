@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>HearSight - Destination</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#904d00",
+                        "outline": "#897362",
+                        "tertiary-fixed-dim": "#f6be39",
+                        "on-tertiary-fixed": "#261a00",
+                        "on-primary-fixed": "#2f1500",
+                        "on-secondary-fixed-variant": "#4f4629",
+                        "secondary-container": "#f0e2ba",
+                        "secondary-fixed-dim": "#d4c69f",
+                        "inverse-surface": "#303030",
+                        "on-secondary-container": "#6e6444",
+                        "on-tertiary-container": "#523b00",
+                        "on-error-container": "#93000a",
+                        "surface-container-highest": "#e4e2e1",
+                        "surface-container-high": "#eae8e7",
+                        "outline-variant": "#ddc1ae",
+                        "inverse-primary": "#ffb77d",
+                        "on-primary": "#ffffff",
+                        "surface-container": "#f0eded",
+                        "surface-dim": "#dcd9d9",
+                        "tertiary-container": "#d6a21a",
+                        "tertiary": "#795900",
+                        "primary-container": "#ff8c00",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-low": "#f6f3f2",
+                        "surface": "#fbf9f8",
+                        "secondary-fixed": "#f0e2ba",
+                        "secondary": "#685e3e",
+                        "on-secondary-fixed": "#221b03",
+                        "on-surface-variant": "#564334",
+                        "surface-bright": "#fbf9f8",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#5c4300",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-tint": "#904d00",
+                        "primary-fixed": "#ffdcc3",
+                        "on-primary-fixed-variant": "#6e3900",
+                        "background": "#fbf9f8",
+                        "error-container": "#ffdad6",
+                        "on-error": "#ffffff",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#e4e2e1",
+                        "on-surface": "#1b1c1c",
+                        "primary-fixed-dim": "#ffb77d",
+                        "on-primary-container": "#623200",
+                        "inverse-on-surface": "#f3f0f0",
+                        "tertiary-fixed": "#ffdfa0",
+                        "on-background": "#1b1c1c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "24px",
+                        "touch-target-min": "64px",
+                        "unit": "8px",
+                        "margin-desktop": "64px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "body-xl": ["Space Grotesk"],
+                        "body-lg": ["Space Grotesk"],
+                        "label-xl": ["Space Grotesk"],
+                        "headline-lg": ["Space Grotesk"],
+                        "display-lg": ["Space Grotesk"],
+                        "headline-lg-mobile": ["Space Grotesk"]
+                    },
+                    "fontSize": {
+                        "body-xl": ["24px", {"lineHeight": "1.5", "fontWeight": "500"}],
+                        "body-lg": ["20px", {"lineHeight": "1.5", "fontWeight": "500"}],
+                        "label-xl": ["18px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .mic-pulse {
+            box-shadow: 0 0 0 0 rgba(144, 77, 0, 0.4);
+            animation: pulse 2s infinite cubic-bezier(0.66, 0, 0, 1);
+        }
+        @keyframes pulse {
+            to { box-shadow: 0 0 0 45px rgba(144, 77, 0, 0); }
+        }
+        .amber-glow {
+            background: radial-gradient(circle at bottom, rgba(255, 140, 0, 0.15) 0%, transparent 70%);
+        }
+        .light-leak {
+            border-top: 1px solid rgba(255, 255, 255, 0.6);
+            border-left: 1px solid rgba(255, 255, 255, 0.4);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-lg min-h-screen flex flex-col overflow-x-hidden amber-glow">
+<!-- TopAppBar from Shared Components JSON -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-surface/80 dark:bg-surface-dim/80 backdrop-blur-xl border-b border-outline-variant/20 shadow-[0_4px_20px_rgba(144,77,0,0.08)] flex justify-between items-center w-full px-margin-mobile h-[72px]">
+<div class="flex items-center">
+<button class="w-touch-target-min h-touch-target-min flex items-center justify-center text-primary hover:bg-primary-container/20 transition-colors Active: scale-95 duration-200">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+</div>
+<h1 class="font-display-lg text-headline-lg text-primary dark:text-primary-fixed-dim tracking-tight">HearSight</h1>
+<div class="flex items-center">
+<button class="w-touch-target-min h-touch-target-min flex items-center justify-center text-primary hover:bg-primary-container/20 transition-colors Active: scale-95 duration-200">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</header>
+<main class="flex-grow pt-[72px] pb-[100px] flex flex-col items-center justify-center px-margin-mobile gap-12 max-w-2xl mx-auto w-full">
+<!-- Large Central Input Field -->
+<section class="w-full space-y-6">
+<div class="relative group">
+<div class="absolute -inset-1 bg-gradient-to-r from-primary-container/20 to-tertiary-container/20 rounded-[32px] blur opacity-25 group-focus-within:opacity-100 transition duration-1000 group-focus-within:duration-200"></div>
+<div class="relative flex items-center bg-surface-container-low rounded-[24px] px-8 py-10 shadow-sm border border-outline-variant/10">
+<input autofocus="" class="w-full bg-transparent border-none focus:ring-0 font-display-lg text-headline-lg text-on-surface placeholder:text-on-surface-variant/40 font-bold" placeholder="Where to?" type="text"/>
+<span class="material-symbols-outlined text-primary text-4xl" data-icon="near_me">near_me</span>
+</div>
+</div>
+</section>
+<!-- Recent Destinations -->
+<section class="w-full flex flex-wrap justify-center gap-6">
+<button class="flex items-center gap-4 px-8 py-6 bg-surface rounded-[24px] shadow-[0_8px_32px_rgba(144,77,0,0.06)] hover:bg-surface-container-high transition-all active:scale-95 light-leak min-w-[180px]">
+<div class="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="home" style="font-variation-settings: 'FILL' 1;">home</span>
+</div>
+<span class="font-label-xl text-label-xl text-on-surface">Home</span>
+</button>
+<button class="flex items-center gap-4 px-8 py-6 bg-surface rounded-[24px] shadow-[0_8px_32px_rgba(144,77,0,0.06)] hover:bg-surface-container-high transition-all active:scale-95 light-leak min-w-[180px]">
+<div class="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="work" style="font-variation-settings: 'FILL' 1;">work</span>
+</div>
+<span class="font-label-xl text-label-xl text-on-surface">Office</span>
+</button>
+</section>
+<!-- Decorative Map Canvas Placeholder -->
+<div class="w-full aspect-video rounded-[32px] overflow-hidden shadow-2xl relative border border-white/40">
+<img alt="Warm light minimalist city map" class="w-full h-full object-cover" data-alt="An abstract, stylized digital map of a city intersection rendered in a soft, warm light aesthetic. The streets are represented by glowing amber lines against a soft cream and parchment background. Subtle glassmorphic layers float above the map, suggesting depth and interactivity. The overall mood is calm, high-end, and extremely clear for accessibility." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqaTBH8F4lZIDhld-H_VqufH9VcajA7_tUu1SiidtN-zNWPoRg9OX2P99NtpfZHJB8fQSkskYzyGxIekLJC1XKGTu9yvsSAvWKq3M5wzgk6sArwiUtIvG5LrzNeFtEAhMv7P47IUkibUeLVUvVjT3xnNr2qnag7vtgHxItU3cTUfQSlqKlLdZkjj4Wewv9TNU22Vc2djAq-ycm6JVLxdo5l6L_6PCQCiFTbTp5ciYd5rguxTmIWhj7mbeTS1TZ3mlwqNT272NiyXvF"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background/40 to-transparent"></div>
+</div>
+</main>
+<!-- Bottom Navigation Shell & Mic Orb Integration -->
+<div class="fixed bottom-0 left-0 right-0 z-50">
+<!-- Central Breathing Mic Orb -->
+<div class="absolute bottom-16 left-1/2 -translate-x-1/2 z-[60]">
+<button class="mic-pulse w-[88px] h-[88px] bg-gradient-to-br from-primary-container to-primary rounded-full flex items-center justify-center shadow-[0_12px_48px_rgba(144,77,0,0.4)] active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-white text-4xl" data-icon="mic" style="font-variation-settings: 'FILL' 1;">mic</span>
+</button>
+</div>
+<!-- BottomNavBar from Shared Components JSON -->
+<nav class="fixed bottom-6 left-0 right-0 z-50 flex justify-around items-center px-gutter py-2 max-w-md mx-auto bg-surface/90 dark:bg-surface-container-high/90 backdrop-blur-2xl rounded-full shadow-xl">
+<!-- Map Tab (Active Logic: Destination entry screen maps to Map/Navigation) -->
+<a class="flex items-center justify-center bg-primary-container text-on-primary-container rounded-full w-touch-target-min h-touch-target-min scale-110 transition-transform duration-300 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="map">map</span>
+</a>
+<!-- Mic Placeholder (The real orb is floating above this slot) -->
+<div class="w-touch-target-min h-touch-target-min opacity-0 pointer-events-none"></div>
+<!-- Settings Tab -->
+<a class="flex items-center justify-center text-on-surface-variant w-touch-target-min h-touch-target-min hover:bg-secondary-container/50 rounded-full transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</a>
+</nav>
+</div>
+<!-- Visual Hint for User -->
+<div class="fixed bottom-32 w-full text-center pointer-events-none">
+<p class="text-primary font-label-xl text-label-xl animate-pulse">Tap or speak your destination</p>
+</div>
+</body></html>

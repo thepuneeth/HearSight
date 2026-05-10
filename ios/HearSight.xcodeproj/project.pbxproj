@@ -16,6 +16,7 @@
 		010000000000000000000108 /* Views/ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 010000000000000000000208 /* Views/ContentView.swift */; };
 		010000000000000000000109 /* Views/StageRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 010000000000000000000209 /* Views/StageRowView.swift */; };
 		010000000000000000000110 /* Resources/Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 010000000000000000000210 /* Resources/Assets.xcassets */; };
+		010000000000000000000111 /* Views/HearSightVisualSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 010000000000000000000211 /* Views/HearSightVisualSystem.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 		010000000000000000000208 /* Views/ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/ContentView.swift; sourceTree = "<group>"; };
 		010000000000000000000209 /* Views/StageRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/StageRowView.swift; sourceTree = "<group>"; };
 		010000000000000000000210 /* Resources/Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Resources/Assets.xcassets; sourceTree = "<group>"; };
+		010000000000000000000211 /* Views/HearSightVisualSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/HearSightVisualSystem.swift; sourceTree = "<group>"; };
 		010000000000000000000301 /* HearSight.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HearSight.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -61,6 +63,7 @@
 				010000000000000000000207 /* Services/WalkthroughViewModel.swift */,
 				010000000000000000000208 /* Views/ContentView.swift */,
 				010000000000000000000209 /* Views/StageRowView.swift */,
+				010000000000000000000211 /* Views/HearSightVisualSystem.swift */,
 				010000000000000000000210 /* Resources/Assets.xcassets */,
 			);
 			path = HearSight;
@@ -151,6 +154,7 @@
 				010000000000000000000107 /* Services/WalkthroughViewModel.swift in Sources */,
 				010000000000000000000108 /* Views/ContentView.swift in Sources */,
 				010000000000000000000109 /* Views/StageRowView.swift in Sources */,
+				010000000000000000000111 /* Views/HearSightVisualSystem.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -261,7 +265,6 @@
 		010000000000000000000903 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
@@ -270,6 +273,8 @@
 				INFOPLIST_KEY_NSAppTransportSecurity_NSAllowsArbitraryLoads = YES;
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "HearSight connects to your local prototype backend.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "HearSight uses your location to speak route stages as you approach them.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "HearSight uses the microphone for spoken destination entry.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "HearSight uses speech recognition to turn a spoken destination into text.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -290,7 +295,6 @@
 		010000000000000000000904 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
@@ -298,6 +302,8 @@
 				INFOPLIST_KEY_NSAppTransportSecurity_NSAllowsArbitraryLoads = YES;
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "HearSight connects to your local prototype backend.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "HearSight uses your location to speak route stages as you approach them.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "HearSight uses the microphone for spoken destination entry.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "HearSight uses speech recognition to turn a spoken destination into text.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

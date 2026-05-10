@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>HearSight - Listening</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Atkinson+Hyperlegible+Next:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-tertiary-fixed": "#1c1b1b",
+                      "on-surface": "#e5e2e1",
+                      "error-container": "#93000a",
+                      "inverse-primary": "#00677f",
+                      "on-error": "#690005",
+                      "inverse-on-surface": "#313030",
+                      "outline-variant": "#3c494e",
+                      "surface-container-low": "#1c1b1b",
+                      "on-primary": "#003543",
+                      "error": "#ffb4ab",
+                      "surface-tint": "#4cd6ff",
+                      "tertiary": "#dfdcdb",
+                      "primary-fixed": "#b7eaff",
+                      "on-background": "#e5e2e1",
+                      "primary": "#a4e6ff",
+                      "surface-container-lowest": "#0e0e0e",
+                      "surface-container-highest": "#353534",
+                      "surface-dim": "#131313",
+                      "on-primary-fixed-variant": "#004e60",
+                      "on-secondary": "#460283",
+                      "primary-container": "#00d1ff",
+                      "inverse-surface": "#e5e2e1",
+                      "outline": "#859399",
+                      "tertiary-fixed-dim": "#c9c6c5",
+                      "on-tertiary-fixed-variant": "#474646",
+                      "on-secondary-container": "#cfa7ff",
+                      "on-secondary-fixed": "#2a0053",
+                      "tertiary-fixed": "#e5e2e1",
+                      "on-error-container": "#ffdad6",
+                      "secondary-fixed-dim": "#dab9ff",
+                      "surface-variant": "#353534",
+                      "on-surface-variant": "#bbc9cf",
+                      "primary-fixed-dim": "#4cd6ff",
+                      "secondary-fixed": "#eedbff",
+                      "surface": "#131313",
+                      "secondary-container": "#602b9d",
+                      "on-tertiary-container": "#4f4e4e",
+                      "on-primary-container": "#00566a",
+                      "surface-container-high": "#2a2a2a",
+                      "tertiary-container": "#c3c0bf",
+                      "secondary": "#dab9ff",
+                      "on-secondary-fixed-variant": "#5e289b",
+                      "background": "#131313",
+                      "on-primary-fixed": "#001f28",
+                      "surface-container": "#201f1f",
+                      "surface-bright": "#393939",
+                      "on-tertiary": "#313030"
+              },
+              "borderRadius": {
+                      "DEFAULT": "1rem",
+                      "lg": "2rem",
+                      "xl": "3rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "gutter": "16px",
+                      "container-padding": "32px",
+                      "unit": "8px",
+                      "margin-mobile": "24px",
+                      "margin-desktop": "64px"
+              },
+              "fontFamily": {
+                      "display-lg": ["Space Grotesk"],
+                      "body-lg": ["Atkinson Hyperlegible Next"],
+                      "headline-md": ["Space Grotesk"],
+                      "display-xl": ["Space Grotesk"],
+                      "label-caps": ["Space Grotesk"],
+                      "body-md": ["Atkinson Hyperlegible Next"]
+              },
+              "fontSize": {
+                      "display-lg": ["36px", {"lineHeight": "1.2", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                      "body-lg": ["20px", {"lineHeight": "1.6", "letterSpacing": "0.01em", "fontWeight": "400"}],
+                      "headline-md": ["24px", {"lineHeight": "1.3", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                      "display-xl": ["48px", {"lineHeight": "1.1", "letterSpacing": "0.02em", "fontWeight": "700"}],
+                      "label-caps": ["14px", {"lineHeight": "1.0", "letterSpacing": "0.15em", "fontWeight": "600"}],
+                      "body-md": ["18px", {"lineHeight": "1.5", "letterSpacing": "0.01em", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .mic-orb-glow {
+            background: radial-gradient(circle, rgba(76, 214, 255, 0.4) 0%, rgba(76, 214, 255, 0) 70%);
+        }
+        .glass-panel {
+            background: rgba(18, 18, 18, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .scrolling-transcript {
+            mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+        }
+        .waveform-bar {
+            transition: height 0.1s ease-in-out;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md overflow-hidden h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-surface/80 dark:bg-surface/80 backdrop-blur-xl docked full-width top-0 rounded-b-lg border-b border-white/10 shadow-[0_0_20px_rgba(76,214,255,0.1)]">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="spatial_audio">spatial_audio</span>
+<span class="text-headline-md font-display-lg font-bold text-primary dark:text-primary tracking-tighter">HearSight</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-label-caps font-label-caps text-on-surface-variant uppercase">AI ACTIVE</span>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/5 transition-all active:scale-95 duration-200">
+<span class="material-symbols-outlined text-primary" data-icon="emergency">emergency</span>
+</button>
+</div>
+</header>
+<!-- Main Canvas: Listening State -->
+<main class="flex-grow flex flex-col items-center justify-center relative px-margin-mobile overflow-hidden pt-24 pb-32">
+<!-- Background Atmospheric Lighting -->
+<div class="absolute inset-0 z-0 pointer-events-none">
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] mic-orb-glow opacity-30"></div>
+</div>
+<!-- Transcript Section -->
+<div class="w-full max-w-2xl z-10 text-center mb-12 scrolling-transcript h-48 overflow-hidden">
+<div class="space-y-4">
+<p class="text-on-surface-variant font-display-lg text-display-lg opacity-40">"I'm looking for a...</p>
+<p class="text-primary font-display-lg text-display-xl leading-tight">...nearby coffee shop with wheelchair access and quiet seating."</p>
+</div>
+</div>
+<!-- Central Mic Interaction -->
+<div class="relative z-10 flex flex-col items-center">
+<!-- Pulsing Rings -->
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 border border-primary/20 rounded-full animate-[ping_3s_infinite]"></div>
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 border border-primary/10 rounded-full animate-[ping_4s_infinite]"></div>
+<!-- The Mic Orb -->
+<div class="relative w-40 h-40 flex items-center justify-center bg-surface-container rounded-full shadow-[0_0_50px_rgba(164,230,255,0.2)] border border-white/10 overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-tr from-primary/10 to-transparent"></div>
+<!-- Visualizer Bars -->
+<div class="flex items-end gap-1.5 h-16">
+<div class="w-1.5 bg-primary rounded-full waveform-bar h-8"></div>
+<div class="w-1.5 bg-primary rounded-full waveform-bar h-12"></div>
+<div class="w-1.5 bg-primary rounded-full waveform-bar h-16"></div>
+<div class="w-1.5 bg-primary rounded-full waveform-bar h-10"></div>
+<div class="w-1.5 bg-primary rounded-full waveform-bar h-14"></div>
+<div class="w-1.5 bg-primary rounded-full waveform-bar h-6"></div>
+</div>
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+<span class="material-symbols-outlined text-primary text-5xl" data-icon="mic" style="font-variation-settings: 'FILL' 1;">mic</span>
+</div>
+</div>
+<div class="mt-12 text-center">
+<p class="text-label-caps font-label-caps text-primary tracking-widest">LISTENING...</p>
+<p class="text-on-surface-variant text-body-md mt-2">Speak clearly to navigate</p>
+</div>
+</div>
+<!-- Detection Insights (Floating Bento Cards) -->
+<div class="absolute bottom-36 left-0 w-full px-6 grid grid-cols-2 md:grid-cols-4 gap-4 z-10">
+<div class="glass-panel p-4 rounded-lg flex flex-col gap-2">
+<div class="flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined text-sm" data-icon="location_on">location_on</span>
+<span class="text-label-caps font-label-caps">NEARBY</span>
+</div>
+<p class="text-on-surface font-headline-md text-headline-md">Blue Bottle</p>
+<p class="text-on-surface-variant text-sm">240m away</p>
+</div>
+<div class="glass-panel p-4 rounded-lg flex flex-col gap-2 border-primary/30">
+<div class="flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined text-sm" data-icon="route">route</span>
+<span class="text-label-caps font-label-caps">NAV MODE</span>
+</div>
+<p class="text-on-surface font-headline-md text-headline-md">Accessible</p>
+<p class="text-on-surface-variant text-sm">AI Pathing On</p>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-gutter pb-8 bg-surface-container/60 dark:bg-surface-container/60 backdrop-blur-2xl floating rounded-xl mx-margin-mobile mb-8 border border-white/5 shadow-[0_8px_32px_0_rgba(0,0,0,0.8)]">
+<a class="flex items-center justify-center text-on-surface-variant w-12 h-12 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+</a>
+<a class="flex items-center justify-center bg-primary text-on-primary rounded-full w-16 h-16 shadow-[0_0_15px_rgba(164,230,255,0.5)] active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="mic" style="font-variation-settings: 'FILL' 1;">mic</span>
+</a>
+<a class="flex items-center justify-center text-on-surface-variant w-12 h-12 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</a>
+</nav>
+<!-- NavigationDrawer (Implicitly accessible/Off-screen) -->
+<div class="fixed inset-y-0 left-0 z-[60] flex flex-col py-8 bg-surface dark:bg-surface docked left-0 h-full w-80 rounded-r-lg shadow-2xl translate-x-[-100%] transition-transform duration-300">
+<div class="px-6 mb-8 flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-surface-container-high overflow-hidden">
+<img alt="Navigator" class="w-full h-full object-cover" data-alt="A professional, high-resolution portrait of a futuristic AI assistant representative. The lighting is soft and cinematic, with a cool blue highlight on one side of the face. The background is a clean, dark charcoal texture consistent with a premium technology interface. The mood is helpful, intelligent, and reassuring." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0vrG88nkVDtJ_4wekGP-XvAo9RNRa62ehml_JFvSNOmXs3tKhQAwKuQZN2pCMN95R6oGLaUM74PHjZeVnOjHRPx0i1VaxEnZveRpa2b4YRnuAvR6dB8AVOYAtOdE2chbeModgGGkwhGuxXYb-HnyQpwcD9kpp8YE6K_JHWQS3g-oQQsjLrhwWXwLZZLuMcHpN95-7LVRVuS_dexiFKOf_J3tW2REt0oWOdnui4gnTTflAPKTNcZ9WXvWRz3XEB2nu4vO6BSi-zpP7"/>
+</div>
+<div>
+<p class="text-headline-md font-headline-md text-primary">Navigator</p>
+<p class="text-label-caps font-label-caps text-on-surface-variant">AI ACTIVE • v2.4</p>
+</div>
+</div>
+<nav class="flex-grow">
+<div class="px-4 space-y-2">
+<div class="flex items-center gap-4 p-4 text-on-surface-variant hover:text-on-surface hover:bg-white/5 rounded-lg mx-2 transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="location_on">location_on</span>
+<span class="text-body-lg font-body-lg">Nearby Landmarks</span>
+</div>
+<div class="flex items-center gap-4 p-4 text-on-surface-variant hover:text-on-surface hover:bg-white/5 rounded-lg mx-2 transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="bookmark">bookmark</span>
+<span class="text-body-lg font-body-lg">Saved Locations</span>
+</div>
+<div class="flex items-center gap-4 p-4 bg-secondary-container text-on-secondary-container rounded-lg mx-2">
+<span class="material-symbols-outlined" data-icon="record_voice_over">record_voice_over</span>
+<span class="text-body-lg font-body-lg">Voice Settings</span>
+</div>
+<div class="flex items-center gap-4 p-4 text-on-surface-variant hover:text-on-surface hover:bg-white/5 rounded-lg mx-2 transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="text-body-lg font-body-lg">System Diagnostic</span>
+</div>
+</div>
+</nav>
+</div>
+</body></html>

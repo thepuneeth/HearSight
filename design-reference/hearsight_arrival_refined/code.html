@@ -1,0 +1,186 @@
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "surface-container-low": "#1d1b20",
+                  "secondary-container": "#4d4465",
+                  "background": "#141218",
+                  "on-tertiary-container": "#503d00",
+                  "surface-container-highest": "#36343a",
+                  "on-surface": "#e6e0e9",
+                  "tertiary-fixed-dim": "#e7c365",
+                  "on-secondary-container": "#bfb2da",
+                  "surface-bright": "#3b383e",
+                  "on-error-container": "#ffdad6",
+                  "on-tertiary-fixed": "#241a00",
+                  "tertiary-fixed": "#ffdf93",
+                  "tertiary": "#e7c365",
+                  "surface-container": "#211f24",
+                  "on-error": "#690005",
+                  "on-tertiary": "#3e2e00",
+                  "outline": "#948e9c",
+                  "on-tertiary-fixed-variant": "#594400",
+                  "secondary-fixed": "#e9ddff",
+                  "primary-fixed": "#e9ddff",
+                  "surface-container-high": "#2b292f",
+                  "tertiary-container": "#c9a74d",
+                  "on-surface-variant": "#cbc4d2",
+                  "outline-variant": "#494551",
+                  "surface-variant": "#36343a",
+                  "primary-fixed-dim": "#cfbcff",
+                  "secondary": "#cdc0e9",
+                  "error-container": "#93000a",
+                  "on-primary-fixed": "#22005d",
+                  "inverse-primary": "#6750a4",
+                  "on-primary-container": "#e0d2ff",
+                  "primary": "#cfbcff",
+                  "on-background": "#e6e0e9",
+                  "on-primary-fixed-variant": "#4f378a",
+                  "inverse-surface": "#e6e0e9",
+                  "primary-container": "#6750a4",
+                  "on-primary": "#381e72",
+                  "surface": "#141218",
+                  "on-secondary": "#342b4b",
+                  "on-secondary-fixed-variant": "#4b4263",
+                  "surface-tint": "#cfbcff",
+                  "surface-container-lowest": "#0f0d13",
+                  "on-secondary-fixed": "#1f1635",
+                  "secondary-fixed-dim": "#cdc0e9",
+                  "surface-dim": "#141218",
+                  "inverse-on-surface": "#322f35",
+                  "error": "#ffb4ab"
+          },
+          "borderRadius": {
+                  "DEFAULT": "0.25rem",
+                  "lg": "0.5rem",
+                  "xl": "0.75rem",
+                  "full": "9999px"
+          },
+          "spacing": {
+                  "stack-gap": "32px",
+                  "gutter": "24px",
+                  "touch-target-min": "64px",
+                  "margin-mobile": "20px",
+                  "margin-desktop": "48px"
+          },
+          "fontFamily": {
+                  "headline-lg-mobile": ["Space Grotesk"],
+                  "display-xl": ["Space Grotesk"],
+                  "body-xl": ["Space Grotesk"],
+                  "body-md": ["Space Grotesk"],
+                  "label-lg": ["Space Grotesk"],
+                  "headline-lg": ["Space Grotesk"]
+          },
+          "fontSize": {
+                  "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                  "display-xl": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                  "body-xl": ["24px", {"lineHeight": "32px", "fontWeight": "500"}],
+                  "body-md": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                  "label-lg": ["16px", {"lineHeight": "24px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                  "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "600"}]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .glow-core {
+      background: radial-gradient(circle, rgba(231, 195, 101, 0.25) 0%, rgba(20, 18, 24, 0) 70%);
+    }
+    .text-glow {
+      text-shadow: 0 0 30px rgba(231, 195, 101, 0.4);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md selection:bg-tertiary/30 min-h-screen flex flex-col overflow-hidden">
+<!-- Shell: TopAppBar (Suppressed for transactional arrival screen per UX goals) -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-margin-mobile py-6 bg-gradient-to-b from-primary/5 to-transparent">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">menu</span>
+<h1 class="font-display-xl text-headline-lg text-primary tracking-tighter">HearSight</h1>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary hover:scale-105 transition-transform">emergency_home</span>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col items-center justify-center relative px-margin-mobile">
+<!-- Atmospheric Background Glow -->
+<div class="absolute inset-0 pointer-events-none flex items-center justify-center">
+<div class="glow-core w-[120%] h-[80%] rounded-full opacity-60"></div>
+</div>
+<!-- Arrival Typography -->
+<div class="relative z-10 text-center flex flex-col items-center gap-stack-gap">
+<div class="w-24 h-24 rounded-full border-2 border-tertiary/20 flex items-center justify-center bg-tertiary/5 backdrop-blur-md mb-4 shadow-[0_0_50px_rgba(231,195,101,0.15)]">
+<span class="material-symbols-outlined text-[48px] text-tertiary" style="font-variation-settings: 'FILL' 1;">location_on</span>
+</div>
+<div class="space-y-4">
+<h2 class="font-display-xl text-headline-lg text-on-surface tracking-tighter leading-tight text-glow">
+          YOU HAVE<br/>ARRIVED
+        </h2>
+<p class="font-body-xl text-on-surface-variant max-w-[280px] mx-auto opacity-80">
+          Your destination is directly ahead.
+        </p>
+</div>
+</div>
+<!-- Contextual Action: Save Location -->
+<div class="mt-20 w-full max-w-sm px-margin-mobile z-20">
+<button class="w-full h-touch-target-min bg-surface-bright/10 backdrop-blur-xl border border-white/10 rounded-full flex items-center justify-center gap-3 text-tertiary font-label-lg shadow-2xl hover:bg-surface-bright/20 transition-all active:scale-95">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">bookmark</span>
+        Save Location
+      </button>
+<div class="mt-stack-gap flex flex-col gap-4">
+<div class="flex items-center gap-4 p-4 rounded-xl bg-surface-container-low/40 backdrop-blur-md border border-outline-variant/20">
+<div class="w-12 h-12 rounded-lg bg-tertiary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary">history</span>
+</div>
+<div>
+<p class="font-label-lg text-on-surface">Central Park North</p>
+<p class="text-on-surface-variant text-sm">Arrived 14:02 PM</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Visual Anchor: Map Preview (Subtle Glassmorphism) -->
+<div class="absolute bottom-40 left-0 right-0 h-32 flex justify-center opacity-40 pointer-events-none">
+<div class="w-full max-w-md h-full rounded-3xl overflow-hidden grayscale contrast-150">
+<img class="w-full h-full object-cover" data-alt="A stylized minimalist topographic map showing abstract city blocks rendered in deep charcoal and warm amber lines. The map has a cinematic HUD aesthetic with faint grid overlays and a soft golden glow at the center marking a destination. The lighting is moody and reassuring. High-end digital interface design with glassmorphic blur effects." data-location="New York City" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuLbSsNitOjo3gb82iVUihVmBWdqszB1tA8hJfuZP9FGKA6R6a6ZczhEzeyFvT8IlEuo_i_kvK6SiIuaWkgx4XAXRANItFlAItnyeWhgF5zkPRU10ZYxilVc6JVvC6uQHY0AEk0rloalcOweTeCPZwip1JSkEU9BForIH4SebmtJhBOE825tQhYvI9ygJhOLCX0DtH2f8MUVkEduSu2LNPt3-IDmN62KhngX6PCXMFd4FN2RUDRtH3N8dA7X0RI_en8cGIjGSEUvsV"/>
+</div>
+</div>
+</main>
+<!-- Shell: BottomNavBar (Active: History/Arrival) -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-gutter py-4 bg-surface-container-lowest/80 dark:bg-surface-container-lowest/80 backdrop-blur-3xl rounded-t-[40px] pb-8 bg-gradient-to-t from-primary/10 via-transparent to-transparent shadow-[0_-20px_50px_-12px_rgba(207,188,255,0.2)]">
+<button class="flex items-center justify-center text-on-surface-variant w-touch-target-min h-touch-target-min hover:bg-surface-bright/20 transition-all">
+<span class="material-symbols-outlined">explore</span>
+</button>
+<button class="flex items-center justify-center text-on-surface-variant w-touch-target-min h-touch-target-min hover:bg-surface-bright/20 transition-all">
+<span class="material-symbols-outlined">spatial_audio</span>
+</button>
+<button class="flex items-center justify-center text-on-surface-variant w-touch-target-min h-touch-target-min hover:bg-surface-bright/20 transition-all">
+<span class="material-symbols-outlined">mic</span>
+</button>
+<button class="flex items-center justify-center bg-primary-container text-on-primary-container rounded-full w-touch-target-min h-touch-target-min shadow-[0_0_20px_rgba(207,188,255,0.4)] active:scale-90 duration-300 ease-out">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">history</span>
+</button>
+<button class="flex items-center justify-center text-on-surface-variant w-touch-target-min h-touch-target-min hover:bg-surface-bright/20 transition-all">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</nav>
+</body></html>

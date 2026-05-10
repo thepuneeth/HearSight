@@ -51,5 +51,5 @@ function mockStage(index, coordinate, headingDegrees, instruction, cue) {
 }
 
 export function safetyNoticeText() {
-  return "HearSight is a personal route familiarity prototype. It does not verify traffic, sidewalk conditions, construction, curb ramps, or whether it is safe to cross. Use normal mobility tools and live surroundings.";
+  return "Street View may be outdated. Use this for route familiarity, not safety decisions.";
 }

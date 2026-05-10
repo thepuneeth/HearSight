@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>HearSight - Listening</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#904d00",
+                        "outline": "#897362",
+                        "tertiary-fixed-dim": "#f6be39",
+                        "on-tertiary-fixed": "#261a00",
+                        "on-primary-fixed": "#2f1500",
+                        "on-secondary-fixed-variant": "#4f4629",
+                        "secondary-container": "#f0e2ba",
+                        "secondary-fixed-dim": "#d4c69f",
+                        "inverse-surface": "#303030",
+                        "on-secondary-container": "#6e6444",
+                        "on-tertiary-container": "#523b00",
+                        "on-error-container": "#93000a",
+                        "surface-container-highest": "#e4e2e1",
+                        "surface-container-high": "#eae8e7",
+                        "outline-variant": "#ddc1ae",
+                        "inverse-primary": "#ffb77d",
+                        "on-primary": "#ffffff",
+                        "surface-container": "#f0eded",
+                        "surface-dim": "#dcd9d9",
+                        "tertiary-container": "#d6a21a",
+                        "tertiary": "#795900",
+                        "primary-container": "#ff8c00",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-low": "#f6f3f2",
+                        "surface": "#fbf9f8",
+                        "secondary-fixed": "#f0e2ba",
+                        "secondary": "#685e3e",
+                        "on-secondary-fixed": "#221b03",
+                        "on-surface-variant": "#564334",
+                        "surface-bright": "#fbf9f8",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#5c4300",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-tint": "#904d00",
+                        "primary-fixed": "#ffdcc3",
+                        "on-primary-fixed-variant": "#6e3900",
+                        "background": "#fbf9f8",
+                        "error-container": "#ffdad6",
+                        "on-error": "#ffffff",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#e4e2e1",
+                        "on-surface": "#1b1c1c",
+                        "primary-fixed-dim": "#ffb77d",
+                        "on-primary-container": "#623200",
+                        "inverse-on-surface": "#f3f0f0",
+                        "tertiary-fixed": "#ffdfa0",
+                        "on-background": "#1b1c1c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "24px",
+                        "touch-target-min": "64px",
+                        "unit": "8px",
+                        "margin-desktop": "64px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "body-xl": ["Space Grotesk"],
+                        "body-lg": ["Space Grotesk"],
+                        "label-xl": ["Space Grotesk"],
+                        "headline-lg": ["Space Grotesk"],
+                        "display-lg": ["Space Grotesk"],
+                        "headline-lg-mobile": ["Space Grotesk"]
+                    },
+                    "fontSize": {
+                        "body-xl": ["24px", {"lineHeight": "1.5", "fontWeight": "500"}],
+                        "body-lg": ["20px", {"lineHeight": "1.5", "fontWeight": "500"}],
+                        "label-xl": ["18px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .light-leak {
+            box-shadow: inset 1px 1px 0px 0px rgba(255, 255, 255, 0.8);
+        }
+        .amber-glow {
+            box-shadow: 0 8px 32px rgba(144, 77, 0, 0.12);
+        }
+        .orb-pulse-1 {
+            background: radial-gradient(circle, #ff8c00 0%, #904d00 100%);
+        }
+        .orb-pulse-bg {
+            background: radial-gradient(circle, rgba(255, 140, 0, 0.15) 0%, rgba(251, 249, 248, 0) 70%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-lg min-h-screen flex flex-col selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar Shell -->
+<header class="fixed top-0 left-0 right-0 z-50 flex justify-between items-center w-full px-margin-mobile h-[72px] bg-surface/80 backdrop-blur-xl border-b border-outline-variant/20 shadow-[0_4px_20px_rgba(144,77,0,0.08)]">
+<div class="flex items-center justify-center w-touch-target-min h-touch-target-min hover:bg-primary-container/20 transition-colors rounded-full active:scale-95 duration-200">
+<span class="material-symbols-outlined text-primary" data-icon="menu">menu</span>
+</div>
+<h1 class="font-display-lg text-headline-lg text-primary tracking-tight">HearSight</h1>
+<div class="flex items-center justify-center w-touch-target-min h-touch-target-min hover:bg-primary-container/20 transition-colors rounded-full active:scale-95 duration-200">
+<span class="material-symbols-outlined text-primary" data-icon="account_circle">account_circle</span>
+</div>
+</header>
+<!-- Main Canvas Content -->
+<main class="flex-grow flex flex-col items-center justify-center px-margin-mobile pt-[72px] pb-[120px] relative overflow-hidden">
+<!-- Subtle Audio Waves / Background Decoration -->
+<div class="absolute inset-0 z-0 pointer-events-none flex items-center justify-center">
+<div class="w-[600px] h-[600px] orb-pulse-bg rounded-full opacity-40 blur-3xl"></div>
+<div class="absolute w-[400px] h-[400px] border border-primary-container/10 rounded-full scale-110 opacity-20"></div>
+<div class="absolute w-[300px] h-[300px] border border-primary-container/20 rounded-full scale-125 opacity-10"></div>
+</div>
+<!-- Listening Interaction Zone -->
+<div class="z-10 flex flex-col items-center space-y-12 max-w-md w-full">
+<!-- Massive Central Microphone Orb -->
+<div class="relative group">
+<!-- Expanding Outer Rings (Visual Pulse) -->
+<div class="absolute inset-0 rounded-full bg-primary-container/20 animate-ping opacity-30"></div>
+<!-- Main Orb Component -->
+<div class="w-[180px] h-[180px] md:w-[240px] md:h-[240px] rounded-full orb-pulse-1 flex items-center justify-center amber-glow light-leak relative z-20 transition-transform duration-700 hover:scale-105">
+<span class="material-symbols-outlined text-on-primary text-[64px] md:text-[96px]" data-icon="mic" style="font-variation-settings: 'FILL' 1;">mic</span>
+</div>
+</div>
+<!-- Listening Message -->
+<div class="text-center space-y-4">
+<h2 class="font-headline-lg text-headline-lg text-inverse-surface tracking-tight">
+                    Listening for your command...
+                </h2>
+<div class="flex items-center justify-center gap-2">
+<div class="w-3 h-3 bg-primary-container rounded-full animate-bounce delay-75"></div>
+<div class="w-3 h-3 bg-primary-container rounded-full animate-bounce delay-150"></div>
+<div class="w-3 h-3 bg-primary-container rounded-full animate-bounce delay-300"></div>
+</div>
+</div>
+<!-- Descriptive Insight Card (Bento-style snippet) -->
+<div class="w-full bg-surface-container-low/60 backdrop-blur-md rounded-[24px] p-6 light-leak amber-glow flex items-center gap-6">
+<div class="bg-primary-container/10 p-4 rounded-full">
+<span class="material-symbols-outlined text-primary text-[32px]" data-icon="lightbulb">lightbulb</span>
+</div>
+<div class="flex-1">
+<p class="font-label-xl text-label-xl text-on-surface-variant">Try asking:</p>
+<p class="font-body-lg text-body-lg text-on-surface italic">"Describe what's in front of me"</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Suppressed for Focused Intent - Using Contextual Cancel Button instead -->
+<div class="fixed bottom-0 left-0 right-0 p-margin-mobile flex justify-center z-50 bg-gradient-to-t from-background via-background/90 to-transparent">
+<button class="w-full max-w-md h-touch-target-min bg-surface-container-highest text-inverse-surface font-label-xl text-label-xl rounded-full shadow-lg border border-outline-variant/30 flex items-center justify-center gap-3 active:scale-95 transition-all duration-200 hover:bg-surface-dim">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+            Cancel
+        </button>
+</div>
+<!-- Background Asset Simulation (Decorative image as backdrop snippet) -->
+<div class="hidden">
+<img alt="Visual tone placeholder" data-alt="A soft, atmospheric digital visualization of sound waves in a warm light-mode aesthetic. Glowing golden ripples and amber particles flow gently across a minimalist parchment-colored background. The scene feels organic, serene, and premium, with blurred depth and subtle glassmorphic textures suggesting a high-end accessibility interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBV-_r5u8guTTvb5xyzcu0ovTUoIQm1QYGOCpLk9czlJzGHzPys5jMLxqbr5vG2_ZvWZtggmuYfPggxA5VCm2vWUaNx72X_qhiJRL-GgV-yy23Md6FxlyLz981KxKd2L0VhVGZbL9DEYAHfTN05HfEkrDzXgbJEfc0YXl3p5lGwW7VIBz7o962wvYBL2ygs4aD0TcIwDl1-tTM7x_QJTz81lBAIGPgXxUbYRxwpIB7v0yRFdTMLtwH3a8Cu6ky-RBmj9gtbv_gJW_FI"/>
+</div>
+</body></html>
