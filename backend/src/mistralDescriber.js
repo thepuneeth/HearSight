@@ -65,12 +65,17 @@ export async function describeImage({
         {
           role: "system",
           content: [
-            "You describe route familiarity cues for a blind pedestrian.",
+            "You write short route familiarity cues for a blind or low-vision pedestrian.",
             "Return only JSON that follows the provided schema.",
+            "Make spokenCue 1-2 short sentences maximum.",
+            "Keep the tone calm, concise, and navigation-focused.",
+            "Focus on stable landmarks: turns, sidewalks, crossings, intersections, signs, entrances, major buildings, and parks.",
+            "Do not be overly descriptive.",
             "Never claim a crossing is safe. Never say 'cross now' or 'safe to cross'.",
-            "Use cautious phrasing such as 'expect', 'Street View suggests', and 'image may be outdated'.",
-            "Describe stable landmarks, surface changes visible in the image, intersections, driveways, stairs, curb cuts, storefronts, and other context that may help familiarity.",
-            "This is not live safety guidance."
+            "Do not make safety decisions.",
+            "Do not speak confidently about traffic, construction, crowds, weather, lighting, or other temporary conditions.",
+            "When uncertain, use cautious wording such as 'appears' or 'possible'.",
+            "This is route familiarity, not live safety guidance."
           ].join(" ")
         },
         {
@@ -95,27 +100,15 @@ export async function describeImage({
 export function fallbackDescription(stage, reason = "Street View imagery was not available for this route stage.") {
   const instruction = stage.routeInstruction || "Continue along the walking route.";
   const context = stage.context || {};
-  const contextParts = [
-    context.streetName ? `near ${context.streetName}` : null,
-    context.nearestIntersection ? `near ${context.nearestIntersection}` : null,
-    Array.isArray(context.nearbyLandmarks) && context.nearbyLandmarks.length
-      ? `near landmarks including ${context.nearbyLandmarks.slice(0, 2).join(" and ")}`
-      : null
-  ].filter(Boolean);
+  const approachTarget = context.streetName ||
+    context.nearestIntersection ||
+    (Array.isArray(context.nearbyLandmarks) ? context.nearbyLandmarks[0] : null);
 
   return {
-    spokenCue: [
-      "No Street View image is available for this point.",
-      contextParts.length ? `This stage appears to be ${contextParts[0]}.` : null,
-      `Route instruction: ${instruction}`,
-      "Use live surroundings and your normal mobility tools."
-    ].filter(Boolean).join(" "),
+    spokenCue: `${approachTarget ? `Approaching ${approachTarget}.` : instruction} Street View unavailable; continue using your normal mobility tools.`,
     landmarks: Array.isArray(context.nearbyLandmarks) ? context.nearbyLandmarks : [],
     crossingOrIntersectionNotes: context.nearestIntersection ? [`Near ${context.nearestIntersection}.`] : [],
-    uncertainties: [[
-      cleanFallbackReason(reason),
-      "No image description was generated for this stage."
-    ].join(" ")],
+    uncertainties: [cleanFallbackReason(reason)],
     confidence: 0
   };
 }
@@ -133,8 +126,11 @@ function buildPrompt({ stage, streetViewMetadata, context = {}, language }) {
       ? `Nearby landmark names: ${context.nearbyLandmarks.join(", ")}.`
       : "Nearby landmark names are unavailable.",
     streetViewMetadata?.date ? `Street View capture date: ${streetViewMetadata.date}.` : "Street View capture date is unknown.",
-    "Create one concise spoken cue of 1-3 sentences for this stage.",
-    "Mention visible landmarks and uncertainty. Do not give live safety commands.",
+    "Create one calm spoken cue of 1-2 short sentences for this stage.",
+    "Prioritize stable navigation context: turns, sidewalks, crossings, intersections, signs, entrances, major buildings, and parks.",
+    "Avoid extra visual detail. Do not give live safety commands or safety judgments.",
+    "Do not confidently describe traffic, construction, crowds, weather, lighting, or other temporary conditions.",
+    "Use 'appears' or 'possible' when uncertain.",
     "Return JSON only."
   ].join("\n");
 }
@@ -164,7 +160,9 @@ export function sanitizeDescription(description) {
     crossingOrIntersectionNotes: Array.isArray(description.crossingOrIntersectionNotes)
       ? description.crossingOrIntersectionNotes
       : [],
-    uncertainties: Array.isArray(description.uncertainties) ? description.uncertainties : [],
+    uncertainties: Array.isArray(description.uncertainties)
+      ? description.uncertainties.filter((item) => !isRepeatedOutdatedDisclaimer(item))
+      : [],
     confidence: clampConfidence(description.confidence)
   };
 }
@@ -188,9 +186,17 @@ function sanitizeCue(text) {
     .replace(/\bError:\s*/g, "")
     .replace(/\s+/g, " ")
     .trim()
+    .replace(/\b(?:the )?image may be outdated\.?/gi, "")
+    .replace(/\bStreet View may be outdated\.?/gi, "")
+    .replace(/\s+/g, " ")
+    .trim()
     .replace(/\bsafe to cross\b/gi, "crossing safety cannot be determined")
     .replace(/\bcross now\b/gi, "approach the crossing and decide using live traffic cues")
     .replace(/\byou can cross\b/gi, "do not rely on this app to decide when to cross");
+}
+
+function isRepeatedOutdatedDisclaimer(text) {
+  return /\b(?:image|street view) may be outdated\b/i.test(String(text || ""));
 }
 
 function cleanFallbackReason(reason) {

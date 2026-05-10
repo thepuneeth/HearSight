@@ -208,10 +208,15 @@ function streetViewCandidateCoordinates(stage) {
 
 function normalizeCoordinate(value) {
   if (!value || typeof value !== "object") return null;
+  if (!hasCoordinateValue(value.latitude) || !hasCoordinateValue(value.longitude)) return null;
   return {
     latitude: Number(value.latitude),
     longitude: Number(value.longitude)
   };
+}
+
+function hasCoordinateValue(value) {
+  return value !== null && value !== undefined && value !== "";
 }
 
 async function mapWithConcurrency(items, concurrency, mapper) {

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&amp;family=Atkinson+Hyperlegible+Next:ital,wght@0,400..800;1,400..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary-fixed": "#1c1b1b",
+                    "on-surface": "#e5e2e1",
+                    "error-container": "#93000a",
+                    "inverse-primary": "#00677f",
+                    "on-error": "#690005",
+                    "inverse-on-surface": "#313030",
+                    "outline-variant": "#3c494e",
+                    "surface-container-low": "#1c1b1b",
+                    "on-primary": "#003543",
+                    "error": "#ffb4ab",
+                    "surface-tint": "#4cd6ff",
+                    "tertiary": "#dfdcdb",
+                    "primary-fixed": "#b7eaff",
+                    "on-background": "#e5e2e1",
+                    "primary": "#a4e6ff",
+                    "surface-container-lowest": "#0e0e0e",
+                    "surface-container-highest": "#353534",
+                    "surface-dim": "#131313",
+                    "on-primary-fixed-variant": "#004e60",
+                    "on-secondary": "#460283",
+                    "primary-container": "#00d1ff",
+                    "inverse-surface": "#e5e2e1",
+                    "outline": "#859399",
+                    "tertiary-fixed-dim": "#c9c6c5",
+                    "on-tertiary-fixed-variant": "#474646",
+                    "on-secondary-container": "#cfa7ff",
+                    "on-secondary-fixed": "#2a0053",
+                    "tertiary-fixed": "#e5e2e1",
+                    "on-error-container": "#ffdad6",
+                    "secondary-fixed-dim": "#dab9ff",
+                    "surface-variant": "#353534",
+                    "on-surface-variant": "#bbc9cf",
+                    "primary-fixed-dim": "#4cd6ff",
+                    "secondary-fixed": "#eedbff",
+                    "surface": "#131313",
+                    "secondary-container": "#602b9d",
+                    "on-tertiary-container": "#4f4e4e",
+                    "on-primary-container": "#00566a",
+                    "surface-container-high": "#2a2a2a",
+                    "tertiary-container": "#c3c0bf",
+                    "secondary": "#dab9ff",
+                    "on-secondary-fixed-variant": "#5e289b",
+                    "background": "#131313",
+                    "on-primary-fixed": "#001f28",
+                    "surface-container": "#201f1f",
+                    "surface-bright": "#393939",
+                    "on-tertiary": "#313030"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gutter": "16px",
+                    "container-padding": "32px",
+                    "unit": "8px",
+                    "margin-mobile": "24px",
+                    "margin-desktop": "64px"
+            },
+            "fontFamily": {
+                    "display-lg": ["Space Grotesk"],
+                    "body-lg": ["Atkinson Hyperlegible Next"],
+                    "headline-md": ["Space Grotesk"],
+                    "display-xl": ["Space Grotesk"],
+                    "label-caps": ["Space Grotesk"],
+                    "body-md": ["Atkinson Hyperlegible Next"]
+            },
+            "fontSize": {
+                    "display-lg": ["36px", {"lineHeight": "1.2", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                    "body-lg": ["20px", {"lineHeight": "1.6", "letterSpacing": "0.01em", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "1.3", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                    "display-xl": ["48px", {"lineHeight": "1.1", "letterSpacing": "0.02em", "fontWeight": "700"}],
+                    "label-caps": ["14px", {"lineHeight": "1.0", "letterSpacing": "0.15em", "fontWeight": "600"}],
+                    "body-md": ["18px", {"lineHeight": "1.5", "letterSpacing": "0.01em", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bg-radar-gradient {
+            background: radial-gradient(circle at center, rgba(164, 230, 255, 0.05) 0%, rgba(5, 5, 5, 1) 70%);
+        }
+        .light-leak {
+            background: linear-gradient(135deg, rgba(164, 230, 255, 0.1) 0%, transparent 50%);
+        }
+        .pulse-ring {
+            border: 1px solid rgba(164, 230, 255, 0.2);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md overflow-hidden select-none">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-surface/80 dark:bg-surface/80 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(76,214,255,0.1)] rounded-b-lg">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="spatial_audio">spatial_audio</span>
+<h1 class="text-headline-md font-display-lg font-bold text-primary dark:text-primary tracking-tighter">HearSight</h1>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/10">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="text-label-caps font-label-caps text-primary">GPS ACTIVE</span>
+</div>
+<button class="material-symbols-outlined text-primary hover:bg-white/5 transition-all p-2 rounded-full active:scale-95 duration-200" data-icon="emergency">emergency</button>
+</div>
+</header>
+<!-- Main Navigation Canvas -->
+<main class="relative h-screen w-full flex flex-col items-center justify-center pt-24 pb-32 px-margin-mobile bg-radar-gradient">
+<!-- Spatial HUD / Radar Background -->
+<div class="absolute inset-0 pointer-events-none overflow-hidden flex items-center justify-center">
+<div class="pulse-ring w-[300px] h-[300px]"></div>
+<div class="pulse-ring w-[500px] h-[500px]"></div>
+<div class="pulse-ring w-[700px] h-[700px]"></div>
+<div class="pulse-ring w-[900px] h-[900px]"></div>
+<!-- Directional Beam -->
+<div class="absolute w-1 h-1/2 bg-gradient-to-t from-transparent via-primary/40 to-primary/80 blur-sm transform -translate-y-1/2 origin-bottom rotate-[15deg]"></div>
+<!-- Detected Object Orbs -->
+<div class="absolute top-[30%] left-[65%] w-4 h-4 bg-primary rounded-full shadow-[0_0_20px_#a4e6ff] animate-pulse"></div>
+<div class="absolute top-[55%] left-[20%] w-3 h-3 bg-secondary rounded-full shadow-[0_0_15px_#dab9ff]"></div>
+</div>
+<!-- Upper Half: Huge Text Directions -->
+<section class="relative z-10 w-full max-w-2xl text-center space-y-4 mb-auto">
+<div class="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-primary-container/20 border border-primary/30 backdrop-blur-md">
+<span class="material-symbols-outlined text-primary" data-icon="near_me">near_me</span>
+<span class="text-label-caps font-label-caps text-primary uppercase">Destination: Central Station</span>
+</div>
+<h2 class="text-display-xl font-display-xl leading-none text-primary uppercase drop-shadow-lg">
+                TURN RIGHT<br/>IN 20 FT
+            </h2>
+<div class="flex items-center justify-center gap-6 mt-8">
+<div class="flex flex-col items-center">
+<span class="text-label-caps font-label-caps text-on-surface-variant mb-1">DISTANCE</span>
+<span class="text-headline-md font-headline-md text-on-surface">1.2 MI</span>
+</div>
+<div class="w-px h-10 bg-white/10"></div>
+<div class="flex flex-col items-center">
+<span class="text-label-caps font-label-caps text-on-surface-variant mb-1">ESTIMATED</span>
+<span class="text-headline-md font-headline-md text-on-surface">8 MIN</span>
+</div>
+</div>
+</section>
+<!-- Lower Half: Haptic Waveform & Progress -->
+<section class="relative z-10 w-full max-w-md mt-auto mb-12">
+<!-- Glassmorphism Card -->
+<div class="relative bg-surface-container/60 backdrop-blur-2xl rounded-lg p-gutter border border-white/10 shadow-2xl light-leak">
+<div class="flex justify-between items-center mb-6">
+<span class="text-label-caps font-label-caps text-on-surface-variant">HAPTIC FEEDBACK WAVE</span>
+<span class="text-label-caps font-label-caps text-primary">SYNCED</span>
+</div>
+<!-- Haptic Waveform Visualization -->
+<div class="flex items-end justify-between h-16 w-full gap-1 mb-8">
+<div class="w-1 bg-primary/20 h-[40%] rounded-full"></div>
+<div class="w-1 bg-primary/40 h-[60%] rounded-full"></div>
+<div class="w-1 bg-primary/60 h-[85%] rounded-full"></div>
+<div class="w-1 bg-primary h-[100%] rounded-full shadow-[0_0_10px_#a4e6ff]"></div>
+<div class="w-1 bg-primary h-[90%] rounded-full shadow-[0_0_10px_#a4e6ff]"></div>
+<div class="w-1 bg-primary/60 h-[70%] rounded-full"></div>
+<div class="w-1 bg-primary/40 h-[50%] rounded-full"></div>
+<div class="w-1 bg-primary/20 h-[30%] rounded-full"></div>
+<div class="w-1 bg-primary/40 h-[60%] rounded-full"></div>
+<div class="w-1 bg-primary/60 h-[80%] rounded-full"></div>
+<div class="w-1 bg-primary h-[100%] rounded-full shadow-[0_0_10px_#a4e6ff]"></div>
+<div class="w-1 bg-primary/60 h-[70%] rounded-full"></div>
+<div class="w-1 bg-primary/40 h-[50%] rounded-full"></div>
+<div class="w-1 bg-primary/20 h-[20%] rounded-full"></div>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between text-label-caps font-label-caps">
+<span class="text-on-surface-variant">PROGRESS</span>
+<span class="text-on-surface">45%</span>
+</div>
+<div class="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+<div class="w-[45%] h-full bg-primary shadow-[0_0_10px_#a4e6ff]"></div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-gutter pb-8 bg-surface-container/60 dark:bg-surface-container/60 backdrop-blur-2xl border border-white/5 shadow-[0_8px_32px_0_rgba(0,0,0,0.8)] rounded-xl mx-margin-mobile mb-8">
+<button class="flex items-center justify-center text-on-surface-variant w-12 h-12 hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+</button>
+<button class="flex items-center justify-center bg-primary text-on-primary rounded-full w-16 h-16 shadow-[0_0_15px_rgba(164,230,255,0.5)] active:scale-90 duration-200">
+<span class="material-symbols-outlined" data-icon="mic" data-weight="fill" style="font-variation-settings: 'FILL' 1;">mic</span>
+</button>
+<button class="flex items-center justify-center text-on-surface-variant w-12 h-12 hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</nav>
+<!-- Background Camera/Spatial Placeholder -->
+<div class="fixed inset-0 -z-10 bg-black">
+<img class="w-full h-full object-cover opacity-30 grayscale brightness-50" data-alt="A cinematic, low-light first-person view of a city street at night, seen through a high-tech augmented reality interface. The street is dimly lit with deep charcoal shadows and subtle electric blue light leaks. Glowing geometric overlays and concentric pulse rings in vibrant cyan hover in the 3D space, highlighting safe pathways and architectural landmarks. The mood is futuristic, serene, and technologically advanced, using a strict dark-mode aesthetic with high-contrast neon accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAw2TLpP8N7vfUzyRnqCaEH3U9LBiZYrYPm5lD4ZO52TUEvdFcHkRJ-EJQvMEFpWEZ4IP_VHtj1Yn2I6bQaJbicA016Wgdtr0FZcIHKaemOU0bnTBr3_1AuIDpKYoVPBE4k32ivppYIzI3qeOLly0HuQX8ayXLrXd1fhdkEnT_-57EqusQJ6hq96atwbSwTahs9t6IO4zo3QpRIA6W3J6q5jO8JLlSefJLw7DBCRgzI4oXHl1PT4xkbIW03Yv2IMI6_Cil-TmUTmtiY"/>
+</div>
+</body></html>

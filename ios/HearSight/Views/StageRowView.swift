@@ -26,12 +26,12 @@ struct StageRowView: View {
 
             ViewThatFits {
                 HStack(spacing: 12) {
-                    stageMetric("\(stage.routeDistanceMeters)m", icon: "point.topleft.down.curvedto.point.bottomright.up")
+                    stageMetric(progressLabel, icon: "figure.walk.motion")
                     stageMetric("\(stage.headingDegrees) deg", icon: "safari")
                     stageMetric(confidenceLabel, icon: "gauge.with.dots.needle.33percent")
                 }
                 VStack(alignment: .leading, spacing: 6) {
-                    stageMetric("\(stage.routeDistanceMeters)m", icon: "point.topleft.down.curvedto.point.bottomright.up")
+                    stageMetric(progressLabel, icon: "figure.walk.motion")
                     stageMetric("\(stage.headingDegrees) deg", icon: "safari")
                     stageMetric(confidenceLabel, icon: "gauge.with.dots.needle.33percent")
                 }
@@ -54,6 +54,7 @@ struct StageRowView: View {
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .accessibilityElement(children: .combine)
         .accessibilityLabel(accessibilitySummary)
+        .accessibilityHint("Double tap the Hear Cue button in route preview to speak this cue.")
     }
 
     private var iconName: String {
@@ -71,6 +72,10 @@ struct StageRowView: View {
         "\(Int((stage.description.confidence * 100).rounded()))%"
     }
 
+    private var progressLabel: String {
+        stage.kind == .destination ? "Destination area" : "About \(stage.routeDistanceMeters) meters from start"
+    }
+
     private func stageMetric(_ text: String, icon: String) -> some View {
         Label(text, systemImage: icon)
             .font(.caption)
@@ -84,7 +89,7 @@ struct StageRowView: View {
             "Stage \(stage.index + 1)",
             isNext ? "next stage" : "",
             stage.description.spokenCue,
-            "Distance \(stage.routeDistanceMeters) meters from start.",
+            progressLabel,
             "Confidence \(confidenceLabel)."
         ]
         if !stage.description.uncertainties.isEmpty {

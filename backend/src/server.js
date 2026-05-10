@@ -87,8 +87,8 @@ async function proxyStreetView({ url, response, config, googleMapsClient }) {
   }
 
   const coordinate = {
-    latitude: Number(url.searchParams.get("lat")),
-    longitude: Number(url.searchParams.get("lng"))
+    latitude: parseRequiredNumber(url.searchParams.get("lat")),
+    longitude: parseRequiredNumber(url.searchParams.get("lng"))
   };
   const headingDegrees = Number(url.searchParams.get("heading") || 0);
 
@@ -104,6 +104,11 @@ async function proxyStreetView({ url, response, config, googleMapsClient }) {
     "Cache-Control": "no-store"
   });
   response.end(image.bytes);
+}
+
+function parseRequiredNumber(value) {
+  if (value === null || value === undefined || value === "") return Number.NaN;
+  return Number(value);
 }
 
 async function readJsonBody(request) {

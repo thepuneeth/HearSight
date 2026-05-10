@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "surface-container-low": "#1d1b20",
+                  "secondary-container": "#4d4465",
+                  "background": "#141218",
+                  "on-tertiary-container": "#503d00",
+                  "surface-container-highest": "#36343a",
+                  "on-surface": "#e6e0e9",
+                  "tertiary-fixed-dim": "#e7c365",
+                  "on-secondary-container": "#bfb2da",
+                  "surface-bright": "#3b383e",
+                  "on-error-container": "#ffdad6",
+                  "on-tertiary-fixed": "#241a00",
+                  "tertiary-fixed": "#ffdf93",
+                  "tertiary": "#e7c365",
+                  "surface-container": "#211f24",
+                  "on-error": "#690005",
+                  "on-tertiary": "#3e2e00",
+                  "outline": "#948e9c",
+                  "on-tertiary-fixed-variant": "#594400",
+                  "secondary-fixed": "#e9ddff",
+                  "primary-fixed": "#e9ddff",
+                  "surface-container-high": "#2b292f",
+                  "tertiary-container": "#c9a74d",
+                  "on-surface-variant": "#cbc4d2",
+                  "outline-variant": "#494551",
+                  "surface-variant": "#36343a",
+                  "primary-fixed-dim": "#cfbcff",
+                  "secondary": "#cdc0e9",
+                  "error-container": "#93000a",
+                  "on-primary-fixed": "#22005d",
+                  "inverse-primary": "#6750a4",
+                  "on-primary-container": "#e0d2ff",
+                  "primary": "#cfbcff",
+                  "on-background": "#e6e0e9",
+                  "on-primary-fixed-variant": "#4f378a",
+                  "inverse-surface": "#e6e0e9",
+                  "primary-container": "#6750a4",
+                  "on-primary": "#381e72",
+                  "surface": "#141218",
+                  "on-secondary": "#342b4b",
+                  "on-secondary-fixed-variant": "#4b4263",
+                  "surface-tint": "#cfbcff",
+                  "surface-container-lowest": "#0f0d13",
+                  "on-secondary-fixed": "#1f1635",
+                  "secondary-fixed-dim": "#cdc0e9",
+                  "surface-dim": "#141218",
+                  "inverse-on-surface": "#322f35",
+                  "error": "#ffb4ab"
+          },
+          "borderRadius": {
+                  "DEFAULT": "0.25rem",
+                  "lg": "0.5rem",
+                  "xl": "0.75rem",
+                  "full": "9999px"
+          },
+          "spacing": {
+                  "stack-gap": "32px",
+                  "gutter": "24px",
+                  "touch-target-min": "64px",
+                  "margin-mobile": "20px",
+                  "margin-desktop": "48px"
+          },
+          "fontFamily": {
+                  "headline-lg-mobile": ["Space Grotesk"],
+                  "display-xl": ["Space Grotesk"],
+                  "body-xl": ["Space Grotesk"],
+                  "body-md": ["Space Grotesk"],
+                  "label-lg": ["Space Grotesk"],
+                  "headline-lg": ["Space Grotesk"]
+          },
+          "fontSize": {
+                  "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                  "display-xl": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                  "body-xl": ["24px", {"lineHeight": "32px", "fontWeight": "500"}],
+                  "body-md": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                  "label-lg": ["16px", {"lineHeight": "24px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                  "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "600"}]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      background-color: #141218;
+      overflow: hidden;
+    }
+    .orb-glow-cyan {
+      box-shadow: 0 0 120px 40px rgba(103, 80, 164, 0.4), 0 0 200px 80px rgba(207, 188, 255, 0.1);
+    }
+    .orb-glow-violet {
+      box-shadow: 0 0 100px 30px rgba(77, 68, 101, 0.5), 0 0 180px 60px rgba(147, 0, 10, 0.05);
+    }
+    .glass-morphism {
+      backdrop-filter: blur(40px);
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex flex-col h-screen font-body-md text-on-surface selection:bg-primary/30">
+<!-- TopAppBar Section -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-margin-mobile py-6 bg-surface/10 dark:bg-surface/10 backdrop-blur-xl bg-gradient-to-b from-primary/5 to-transparent shadow-[0_-1px_0_rgba(255,255,255,0.1)_inset]">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary hover:scale-105 transition-transform" data-icon="menu">menu</span>
+<h1 class="font-display-xl text-headline-lg text-primary tracking-tighter">HearSight</h1>
+</div>
+<span class="material-symbols-outlined text-primary hover:scale-105 transition-transform" data-icon="emergency_home">emergency_home</span>
+</header>
+<!-- Main Canvas: Refined Listening Interface -->
+<main class="flex-1 flex flex-col items-center justify-center relative overflow-hidden px-margin-mobile">
+<!-- Atmospheric Background Lighting -->
+<div class="absolute top-1/4 -left-20 w-96 h-96 bg-primary/10 rounded-full blur-[120px]"></div>
+<div class="absolute bottom-1/4 -right-20 w-96 h-96 bg-secondary-container/20 rounded-full blur-[150px]"></div>
+<!-- The Focal Point: Microphone Orb -->
+<div class="relative z-10 flex flex-col items-center gap-stack-gap">
+<!-- Orb Visual -->
+<div class="relative w-[280px] h-[280px] md:w-[400px] md:h-[400px] flex items-center justify-center">
+<!-- Pulse Layers -->
+<div class="absolute inset-0 rounded-full bg-primary/10 orb-glow-cyan opacity-40"></div>
+<div class="absolute inset-8 rounded-full bg-secondary-container/20 orb-glow-violet opacity-60"></div>
+<!-- Core Orb -->
+<div class="relative w-48 h-48 md:w-64 md:h-64 rounded-full glass-morphism border border-white/10 flex items-center justify-center shadow-2xl">
+<div class="absolute inset-0 rounded-full bg-gradient-to-tr from-primary/20 via-transparent to-secondary/20"></div>
+<span class="material-symbols-outlined text-[80px] md:text-[120px] text-primary drop-shadow-[0_0_20px_rgba(207,188,255,0.8)]" data-icon="mic" data-weight="fill" style="font-variation-settings: 'FILL' 1;">mic</span>
+</div>
+<!-- Waveform Decoration (Top/Bottom) -->
+<div class="absolute -bottom-8 w-64 h-1 bg-gradient-to-r from-transparent via-primary/40 to-transparent blur-[2px]"></div>
+<div class="absolute -top-8 w-48 h-1 bg-gradient-to-r from-transparent via-secondary/30 to-transparent blur-[2px]"></div>
+</div>
+<!-- Live Contextual Transcription -->
+<div class="text-center space-y-4 max-w-xl mx-auto">
+<p class="font-label-lg text-on-surface-variant tracking-[0.2em] uppercase">Listening Intensively</p>
+<h2 class="font-display-xl text-on-surface leading-tight px-4">
+          "...nearby <span class="text-primary drop-shadow-[0_0_15px_rgba(207,188,255,0.4)]">coffee shop</span>"
+        </h2>
+<div class="flex items-center justify-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse delay-75"></span>
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse delay-150"></span>
+</div>
+</div>
+</div>
+<!-- Interaction Overlay Area (Transparent) -->
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+<div class="w-full h-full max-w-4xl aspect-square border border-primary/5 rounded-full opacity-20"></div>
+<div class="absolute w-full h-full max-w-2xl aspect-square border border-secondary/5 rounded-full opacity-20"></div>
+</div>
+</main>
+<!-- Minimalist Controls (Task-Focused) -->
+<div class="fixed bottom-[140px] w-full px-margin-mobile flex justify-center gap-stack-gap z-20">
+<button class="w-touch-target-min h-touch-target-min rounded-full glass-morphism flex items-center justify-center text-on-surface border border-white/5 hover:bg-surface-bright/20 transition-all active:scale-90">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+<button class="w-touch-target-min h-touch-target-min rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shadow-[0_0_40px_rgba(103,80,164,0.4)] hover:scale-105 transition-all active:scale-95">
+<span class="material-symbols-outlined" data-icon="save">save</span>
+</button>
+<button class="w-touch-target-min h-touch-target-min rounded-full glass-morphism flex items-center justify-center text-on-surface border border-white/5 hover:bg-surface-bright/20 transition-all active:scale-90">
+<span class="material-symbols-outlined" data-icon="volume_up">volume_up</span>
+</button>
+</div>
+<!-- BottomNavBar Section -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-gutter py-4 bg-surface-container-lowest/80 dark:bg-surface-container-lowest/80 backdrop-blur-3xl rounded-t-[40px] pb-8 bg-gradient-to-t from-primary/10 via-transparent to-transparent shadow-[0_-20px_50px_-12px_rgba(207,188,255,0.2)]">
+<a class="flex items-center justify-center text-on-surface-variant w-touch-target-min h-touch-target-min hover:bg-surface-bright/20 transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+</a>
+<a class="flex items-center justify-center text-on-surface-variant w-touch-target-min h-touch-target-min hover:bg-surface-bright/20 transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="spatial_audio">spatial_audio</span>
+</a>
+<!-- Active State: Listening (Mic) -->
+<a class="flex items-center justify-center bg-primary-container text-on-primary-container rounded-full w-touch-target-min h-touch-target-min shadow-[0_0_20px_rgba(207,188,255,0.4)] transition-all scale-110" href="#">
+<span class="material-symbols-outlined" data-icon="mic" data-weight="fill" style="font-variation-settings: 'FILL' 1;">mic</span>
+</a>
+<a class="flex items-center justify-center text-on-surface-variant w-touch-target-min h-touch-target-min hover:bg-surface-bright/20 transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+</a>
+<a class="flex items-center justify-center text-on-surface-variant w-touch-target-min h-touch-target-min hover:bg-surface-bright/20 transition-all active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</a>
+</nav>
+</body></html>

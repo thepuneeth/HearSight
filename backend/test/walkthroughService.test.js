@@ -30,6 +30,16 @@ test("validates coordinate payloads", () => {
     origin: { latitude: 99, longitude: 0 },
     destination: { latitude: 41.2, longitude: -87.2 }
   }), /origin/);
+
+  assert.throws(() => validateWalkthroughRequest({
+    origin: { latitude: null, longitude: -87.1 },
+    destination: { latitude: 41.2, longitude: -87.2 }
+  }), /origin/);
+
+  assert.throws(() => validateWalkthroughRequest({
+    origin: { latitude: 41.1, longitude: -87.1 },
+    destination: { latitude: 41.2, longitude: null }
+  }), /destination/);
 });
 
 test("resolves destination text and includes clean stage context", async () => {
@@ -148,7 +158,7 @@ test("does not speak raw Street View or Mistral failures", async () => {
   }, "Street View status was ZERO_RESULTS.").spokenCue;
 
   assert.doesNotMatch(noStreetViewCue, /ZERO_RESULTS|Street View status/i);
-  assert.match(noStreetViewCue, /No Street View image is available/);
+  assert.equal(noStreetViewCue, "Approaching Main Street. Street View unavailable; continue using your normal mobility tools.");
 
   const mistralCue = fallbackDescription({
     routeInstruction: "Continue west.",
@@ -173,7 +183,7 @@ test("uses mock walkthroughs without external services", async () => {
 
   assert.equal(walkthrough.stages.length, 3);
   assert.equal(walkthrough.stages[0].description.confidence, 0);
-  assert.match(walkthrough.routeSummary.safetyNotice, /prototype/);
+  assert.equal(walkthrough.routeSummary.safetyNotice, "Street View may be outdated. Use this for route familiarity, not safety decisions.");
 });
 
 test("sanitizes unsafe crossing phrasing from model output", () => {

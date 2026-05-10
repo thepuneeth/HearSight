@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>HearSight - Arrival Confirmation</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary": "#904d00",
+                    "outline": "#897362",
+                    "tertiary-fixed-dim": "#f6be39",
+                    "on-tertiary-fixed": "#261a00",
+                    "on-primary-fixed": "#2f1500",
+                    "on-secondary-fixed-variant": "#4f4629",
+                    "secondary-container": "#f0e2ba",
+                    "secondary-fixed-dim": "#d4c69f",
+                    "inverse-surface": "#303030",
+                    "on-secondary-container": "#6e6444",
+                    "on-tertiary-container": "#523b00",
+                    "on-error-container": "#93000a",
+                    "surface-container-highest": "#e4e2e1",
+                    "surface-container-high": "#eae8e7",
+                    "outline-variant": "#ddc1ae",
+                    "inverse-primary": "#ffb77d",
+                    "on-primary": "#ffffff",
+                    "surface-container": "#f0eded",
+                    "surface-dim": "#dcd9d9",
+                    "tertiary-container": "#d6a21a",
+                    "tertiary": "#795900",
+                    "primary-container": "#ff8c00",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-low": "#f6f3f2",
+                    "surface": "#fbf9f8",
+                    "secondary-fixed": "#f0e2ba",
+                    "secondary": "#685e3e",
+                    "on-secondary-fixed": "#221b03",
+                    "on-surface-variant": "#564334",
+                    "surface-bright": "#fbf9f8",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary-fixed-variant": "#5c4300",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-tint": "#904d00",
+                    "primary-fixed": "#ffdcc3",
+                    "on-primary-fixed-variant": "#6e3900",
+                    "background": "#fbf9f8",
+                    "error-container": "#ffdad6",
+                    "on-error": "#ffffff",
+                    "error": "#ba1a1a",
+                    "surface-variant": "#e4e2e1",
+                    "on-surface": "#1b1c1c",
+                    "primary-fixed-dim": "#ffb77d",
+                    "on-primary-container": "#623200",
+                    "inverse-on-surface": "#f3f0f0",
+                    "tertiary-fixed": "#ffdfa0",
+                    "on-background": "#1b1c1c"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-mobile": "24px",
+                    "touch-target-min": "64px",
+                    "unit": "8px",
+                    "margin-desktop": "64px",
+                    "gutter": "16px"
+            },
+            "fontFamily": {
+                    "body-xl": ["Space Grotesk"],
+                    "body-lg": ["Space Grotesk"],
+                    "label-xl": ["Space Grotesk"],
+                    "headline-lg": ["Space Grotesk"],
+                    "display-lg": ["Space Grotesk"],
+                    "headline-lg-mobile": ["Space Grotesk"]
+            },
+            "fontSize": {
+                    "body-xl": ["24px", {"lineHeight": "1.5", "fontWeight": "500"}],
+                    "body-lg": ["20px", {"lineHeight": "1.5", "fontWeight": "500"}],
+                    "label-xl": ["18px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .glow-pulse {
+            background: radial-gradient(circle, rgba(255, 140, 0, 0.15) 0%, rgba(251, 249, 248, 0) 70%);
+        }
+        .success-orb {
+            background: radial-gradient(circle, #ff8c00 0%, #904d00 100%);
+            box-shadow: 0 0 80px rgba(144, 77, 0, 0.3);
+        }
+        .light-leak {
+            border-top: 1px solid rgba(255, 255, 255, 0.6);
+            border-left: 1px solid rgba(255, 255, 255, 0.4);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-lg selection:bg-primary-container selection:text-on-primary-container min-h-screen flex flex-col overflow-hidden">
+<!-- Top App Bar -->
+<header class="bg-surface/80 backdrop-blur-xl border-b border-outline-variant/20 shadow-[0_4px_20px_rgba(144,77,0,0.08)] flex justify-between items-center w-full px-margin-mobile h-[72px] sticky top-0 z-50">
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-primary text-headline-lg-mobile hover:bg-primary-container/20 transition-colors rounded-full p-2" data-icon="menu">menu</button>
+<h1 class="font-display-lg text-headline-lg text-primary tracking-tight">HearSight</h1>
+</div>
+<div class="flex items-center">
+<button class="material-symbols-outlined text-primary text-headline-lg-mobile hover:bg-primary-container/20 transition-colors rounded-full p-2" data-icon="account_circle">account_circle</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="relative flex-grow flex flex-col items-center justify-center px-margin-mobile overflow-hidden">
+<!-- Ambient Background Glow -->
+<div class="absolute inset-0 glow-pulse pointer-events-none"></div>
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary-container/5 rounded-full blur-[120px] pointer-events-none"></div>
+<!-- Success Visual State -->
+<div class="relative z-10 flex flex-col items-center text-center space-y-10 max-w-lg">
+<!-- Animated Visual Feedback Ring -->
+<div class="relative flex items-center justify-center">
+<div class="absolute w-64 h-64 border-2 border-primary-container/30 rounded-full animate-[ping_3s_ease-in-out_infinite]"></div>
+<div class="absolute w-48 h-48 border-2 border-primary-container/50 rounded-full animate-[ping_4s_ease-in-out_infinite]"></div>
+<div class="success-orb w-32 h-32 rounded-full flex items-center justify-center text-on-primary shadow-2xl">
+<span class="material-symbols-outlined text-[64px] font-bold" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+<!-- Confirmation Text -->
+<div class="space-y-4">
+<h2 class="font-display-lg text-primary text-[56px] leading-tight tracking-tight drop-shadow-sm">YOU HAVE ARRIVED</h2>
+<p class="font-body-xl text-on-surface-variant max-w-md mx-auto">
+                    Welcome to your destination. We have confirmed your location at the main entrance.
+                </p>
+</div>
+<!-- Destination Card (Bento Style) -->
+<div class="w-full bg-surface-container-lowest/80 backdrop-blur-md rounded-[32px] p-8 light-leak shadow-[0_12px_40px_rgba(144,77,0,0.1)] flex items-center gap-6 text-left">
+<div class="bg-primary-container/10 p-4 rounded-2xl">
+<span class="material-symbols-outlined text-primary text-headline-lg" data-icon="location_on" style="font-variation-settings: 'FILL' 1;">location_on</span>
+</div>
+<div>
+<span class="font-label-xl text-primary block mb-1">Destination reached</span>
+<h3 class="font-headline-lg text-on-surface">The Grand Library</h3>
+</div>
+</div>
+<!-- Action Cluster -->
+<div class="flex flex-col gap-4 w-full pt-8">
+<!-- Primary Floating Action: Save -->
+<button class="bg-gradient-to-b from-[#ffb77d] to-primary-container text-on-primary-container h-touch-target-min w-full rounded-full flex items-center justify-center gap-3 font-label-xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all duration-300">
+<span class="material-symbols-outlined" data-icon="bookmark">bookmark</span>
+                    Save Location
+                </button>
+<!-- Secondary Action: End Session -->
+<button class="bg-surface-container-high/60 backdrop-blur text-on-surface h-touch-target-min w-full rounded-full flex items-center justify-center gap-3 font-label-xl border border-outline-variant/30 hover:bg-surface-container-highest transition-colors active:scale-95">
+<span class="material-symbols-outlined" data-icon="exit_to_app">exit_to_app</span>
+                    End Session
+                </button>
+</div>
+</div>
+<!-- Atmospheric Visual Element (Right side) -->
+<div class="hidden lg:block absolute right-margin-desktop top-1/2 -translate-y-1/2 w-72 h-96">
+<img alt="Warm golden light hitting a building" class="w-full h-full object-cover rounded-[48px] shadow-2xl opacity-80" data-alt="A cinematic low-angle photograph of minimalist architectural details bathed in intense, golden-hour sunlight. The warm honey-colored light creates long, soft shadows and a sense of peaceful arrival. The aesthetic is premium and modern, using a palette of deep ambers, soft creams, and rich ochre tones to evoke a feeling of success and comfort. High-key lighting highlights the tactile textures of the smooth stone surfaces." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAcY79ARXQDtm4B6KS89lhXEnB_8g_oUFMTwTnA-68wbBHl9bZkgwj4TdZIAlPyeHXJxUdb_0voD-BevQ36DfEogJ0GH0to8Kh7zLnt5U9p5mJxNrnadiVTG2ADrIRPAg-Pq561mPl-I5Gn-kPP57N68tnL1RRqgZAup5bBgz_PA671tpQT9Tph0Vwy_vilMtttFUYBenOQw2gxW4pdwoIjtgrj9fZORoF3QMbXU0zkW7hwK-9y6WXOH74JYy_DveqPaf1kaaW_hhVh"/>
+</div>
+</main>
+<!-- Bottom Navigation Bar (Contextually persistent but low-profile here) -->
+<nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-48px)] max-w-md bg-surface/90 backdrop-blur-2xl rounded-full z-50 flex justify-around items-center px-gutter py-2 shadow-xl">
+<a class="flex items-center justify-center text-on-surface-variant w-touch-target-min h-touch-target-min hover:bg-secondary-container/50 rounded-full transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="map">map</span>
+</a>
+<a class="flex items-center justify-center bg-primary-container text-on-primary-container rounded-full w-touch-target-min h-touch-target-min scale-110 transition-transform duration-300 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="mic" style="font-variation-settings: 'FILL' 1;">mic</span>
+</a>
+<a class="flex items-center justify-center text-on-surface-variant w-touch-target-min h-touch-target-min hover:bg-secondary-container/50 rounded-full transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</a>
+</nav>
+</body></html>

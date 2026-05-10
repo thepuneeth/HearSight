@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>HearSight Navigation HUD</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary": "#904d00",
+                    "outline": "#897362",
+                    "tertiary-fixed-dim": "#f6be39",
+                    "on-tertiary-fixed": "#261a00",
+                    "on-primary-fixed": "#2f1500",
+                    "on-secondary-fixed-variant": "#4f4629",
+                    "secondary-container": "#f0e2ba",
+                    "secondary-fixed-dim": "#d4c69f",
+                    "inverse-surface": "#303030",
+                    "on-secondary-container": "#6e6444",
+                    "on-tertiary-container": "#523b00",
+                    "on-error-container": "#93000a",
+                    "surface-container-highest": "#e4e2e1",
+                    "surface-container-high": "#eae8e7",
+                    "outline-variant": "#ddc1ae",
+                    "inverse-primary": "#ffb77d",
+                    "on-primary": "#ffffff",
+                    "surface-container": "#f0eded",
+                    "surface-dim": "#dcd9d9",
+                    "tertiary-container": "#d6a21a",
+                    "tertiary": "#795900",
+                    "primary-container": "#ff8c00",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-low": "#f6f3f2",
+                    "surface": "#fbf9f8",
+                    "secondary-fixed": "#f0e2ba",
+                    "secondary": "#685e3e",
+                    "on-secondary-fixed": "#221b03",
+                    "on-surface-variant": "#564334",
+                    "surface-bright": "#fbf9f8",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary-fixed-variant": "#5c4300",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-tint": "#904d00",
+                    "primary-fixed": "#ffdcc3",
+                    "on-primary-fixed-variant": "#6e3900",
+                    "background": "#fbf9f8",
+                    "error-container": "#ffdad6",
+                    "on-error": "#ffffff",
+                    "error": "#ba1a1a",
+                    "surface-variant": "#e4e2e1",
+                    "on-surface": "#1b1c1c",
+                    "primary-fixed-dim": "#ffb77d",
+                    "on-primary-container": "#623200",
+                    "inverse-on-surface": "#f3f0f0",
+                    "tertiary-fixed": "#ffdfa0",
+                    "on-background": "#1b1c1c"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-mobile": "24px",
+                    "touch-target-min": "64px",
+                    "unit": "8px",
+                    "margin-desktop": "64px",
+                    "gutter": "16px"
+            },
+            "fontFamily": {
+                    "body-xl": ["Space Grotesk"],
+                    "body-lg": ["Space Grotesk"],
+                    "label-xl": ["Space Grotesk"],
+                    "headline-lg": ["Space Grotesk"],
+                    "display-lg": ["Space Grotesk"],
+                    "headline-lg-mobile": ["Space Grotesk"]
+            },
+            "fontSize": {
+                    "body-xl": ["24px", {"lineHeight": "1.5", "fontWeight": "500"}],
+                    "body-lg": ["20px", {"lineHeight": "1.5", "fontWeight": "500"}],
+                    "label-xl": ["18px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 48;
+        }
+        .audio-pulse {
+            animation: pulse-ring 4s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { opacity: 0.2; }
+            100% { transform: scale(2.5); opacity: 0; }
+        }
+        .radar-scan {
+            background: conic-gradient(from 0deg, transparent 0%, rgba(255, 140, 0, 0.1) 50%, transparent 100%);
+        }
+        .glass-card {
+            backdrop-filter: blur(24px);
+            background: rgba(253, 252, 251, 0.7);
+            border-top: 1px solid rgba(255, 255, 255, 0.5);
+            border-left: 1px solid rgba(255, 255, 255, 0.5);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background font-body-lg text-on-background selection:bg-primary-container overflow-hidden h-screen w-full flex flex-col">
+<!-- Top Navigation Shell -->
+<header class="flex justify-between items-center w-full px-margin-mobile h-[72px] bg-surface/80 dark:bg-surface-dim/80 backdrop-blur-xl border-b border-outline-variant/20 shadow-[0_4px_20px_rgba(144,77,0,0.08)] z-50">
+<div class="flex items-center gap-4">
+<button class="w-touch-target-min h-touch-target-min flex items-center justify-center hover:bg-primary-container/20 transition-colors active:scale-95 duration-200 rounded-full">
+<span class="material-symbols-outlined text-primary" data-icon="menu">menu</span>
+</button>
+<h1 class="font-display-lg text-headline-lg text-primary tracking-tight">HearSight</h1>
+</div>
+<button class="w-touch-target-min h-touch-target-min flex items-center justify-center hover:bg-primary-container/20 transition-colors active:scale-95 duration-200 rounded-full">
+<span class="material-symbols-outlined text-primary" data-icon="account_circle">account_circle</span>
+</button>
+</header>
+<!-- Main Canvas: Audio Radar HUD -->
+<main class="flex-grow relative overflow-hidden flex flex-col items-center justify-center">
+<!-- Audio Radar Background Layers -->
+<div class="absolute inset-0 flex items-center justify-center">
+<!-- Concentric Rings -->
+<div class="absolute w-[600px] h-[600px] border border-primary-container/10 rounded-full"></div>
+<div class="absolute w-[400px] h-[400px] border border-primary-container/20 rounded-full"></div>
+<div class="absolute w-[200px] h-[200px] border border-primary-container/30 rounded-full"></div>
+<!-- Animated Pulse Effects -->
+<div class="absolute w-[300px] h-[300px] bg-primary-container/5 rounded-full audio-pulse"></div>
+<div class="absolute w-[300px] h-[300px] bg-primary-container/5 rounded-full audio-pulse" style="animation-delay: 2s;"></div>
+<!-- Conic Scan Effect -->
+<div class="absolute w-[800px] h-[800px] radar-scan rounded-full opacity-30"></div>
+</div>
+<!-- Floating Waypoint & Obstacle Markers -->
+<div class="absolute inset-0 z-10 pointer-events-none">
+<!-- Waypoint: North-East -->
+<div class="absolute top-1/4 right-1/4 flex flex-col items-center">
+<div class="w-12 h-12 bg-primary-container text-on-primary-container rounded-full flex items-center justify-center shadow-lg border-2 border-white">
+<span class="material-symbols-outlined" data-icon="near_me">near_me</span>
+</div>
+<span class="mt-2 font-label-xl text-primary bg-surface/90 px-3 py-1 rounded-full text-sm">Wayfinding</span>
+</div>
+<!-- Obstacle: Left Side -->
+<div class="absolute top-1/2 left-1/6 -translate-x-1/2 flex flex-col items-center">
+<div class="w-14 h-14 bg-surface-variant text-on-surface-variant rounded-full flex items-center justify-center shadow-md border-2 border-outline-variant/30 backdrop-blur-sm">
+<span class="material-symbols-outlined" data-icon="warning">warning</span>
+</div>
+<span class="mt-2 font-label-xl text-on-surface-variant bg-surface-container-high/90 px-3 py-1 rounded-full text-sm">Obstacle</span>
+</div>
+<!-- Distance Marker: Far Top -->
+<div class="absolute top-[10%] left-1/2 -translate-x-1/2">
+<div class="px-6 py-3 bg-surface-container-lowest/80 border border-outline-variant/20 rounded-full shadow-sm backdrop-blur-md">
+<p class="font-label-xl text-primary flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="straight">straight</span>
+                        0.4 MI TO DESTINATION
+                    </p>
+</div>
+</div>
+</div>
+<!-- Center Identity: User Location -->
+<div class="relative z-20 w-16 h-16 bg-primary rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(144,77,0,0.4)] border-4 border-white">
+<span class="material-symbols-outlined text-white" data-icon="navigation" style="font-variation-settings: 'FILL' 1;">navigation</span>
+</div>
+<!-- Directional Instruction (Main Bento Card) -->
+<section class="absolute top-margin-mobile left-margin-mobile right-margin-mobile z-30">
+<div class="glass-card p-gutter rounded-[32px] shadow-[0_8px_32px_rgba(144,77,0,0.1)] flex items-center gap-6 max-w-2xl mx-auto">
+<div class="w-20 h-20 bg-primary-container rounded-2xl flex items-center justify-center text-white shrink-0">
+<span class="material-symbols-outlined text-[48px]" data-icon="turn_slight_right">turn_slight_right</span>
+</div>
+<div>
+<h2 class="font-display-lg text-headline-lg-mobile text-on-surface leading-tight">TURN RIGHT IN 50 FT</h2>
+<p class="font-body-lg text-on-surface-variant">Onto Golden Gate Avenue</p>
+</div>
+</div>
+</section>
+<!-- Bottom Haptic Progress Bar & Visualizer -->
+<section class="absolute bottom-[110px] w-full px-margin-mobile z-40 max-w-md">
+<div class="glass-card p-6 rounded-[24px] shadow-lg border border-primary-container/20">
+<div class="flex justify-between items-end mb-4">
+<span class="font-label-xl text-primary">Progress</span>
+<span class="font-label-xl text-on-surface-variant">85%</span>
+</div>
+<div class="h-4 w-full bg-surface-container-highest rounded-full overflow-hidden relative">
+<div class="absolute top-0 left-0 h-full w-[85%] bg-gradient-to-r from-primary-container to-tertiary-container rounded-full"></div>
+<!-- Tactile Pulse on Progress -->
+<div class="absolute top-0 left-[83%] h-full w-2 bg-white/50 blur-[2px]"></div>
+</div>
+<div class="mt-4 flex items-center justify-center gap-3">
+<span class="w-1 h-4 bg-primary-container/40 rounded-full"></span>
+<span class="w-1 h-8 bg-primary-container/60 rounded-full"></span>
+<span class="w-1 h-12 bg-primary-container rounded-full"></span>
+<span class="w-1 h-8 bg-primary-container/60 rounded-full"></span>
+<span class="w-1 h-4 bg-primary-container/40 rounded-full"></span>
+<p class="font-label-xl text-primary mx-4">AUDIO GUIDANCE ACTIVE</p>
+<span class="w-1 h-4 bg-primary-container/40 rounded-full"></span>
+<span class="w-1 h-8 bg-primary-container/60 rounded-full"></span>
+<span class="w-1 h-12 bg-primary-container rounded-full"></span>
+<span class="w-1 h-8 bg-primary-container/60 rounded-full"></span>
+<span class="w-1 h-4 bg-primary-container/40 rounded-full"></span>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Shell -->
+<nav class="fixed bottom-6 left-0 right-0 z-50 flex justify-around items-center px-gutter py-2 max-w-md mx-auto bg-surface/90 dark:bg-surface-container-high/90 backdrop-blur-2xl rounded-full shadow-xl">
+<button class="flex items-center justify-center text-on-surface-variant w-touch-target-min h-touch-target-min hover:bg-secondary-container/50 rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="map">map</span>
+</button>
+<button class="flex items-center justify-center bg-primary-container text-on-primary-container rounded-full w-touch-target-min h-touch-target-min shadow-lg transition-transform duration-300 ease-out scale-110">
+<span class="material-symbols-outlined" data-icon="mic" style="font-variation-settings: 'FILL' 1;">mic</span>
+</button>
+<button class="flex items-center justify-center text-on-surface-variant w-touch-target-min h-touch-target-min hover:bg-secondary-container/50 rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</nav>
+<!-- Background Atmospheric Fill -->
+<div class="fixed inset-0 -z-10 bg-[#FDFCFB]">
+<div class="absolute top-0 right-0 w-[500px] h-[500px] bg-primary-container/5 rounded-full blur-[120px]"></div>
+<div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-tertiary-container/5 rounded-full blur-[120px]"></div>
+</div>
+</body></html>

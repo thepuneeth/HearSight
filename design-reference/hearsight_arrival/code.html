@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "on-tertiary-fixed": "#1c1b1b",
+                "on-surface": "#e5e2e1",
+                "error-container": "#93000a",
+                "inverse-primary": "#00677f",
+                "on-error": "#690005",
+                "inverse-on-surface": "#313030",
+                "outline-variant": "#3c494e",
+                "surface-container-low": "#1c1b1b",
+                "on-primary": "#003543",
+                "error": "#ffb4ab",
+                "surface-tint": "#4cd6ff",
+                "tertiary": "#dfdcdb",
+                "primary-fixed": "#b7eaff",
+                "on-background": "#e5e2e1",
+                "primary": "#a4e6ff",
+                "surface-container-lowest": "#0e0e0e",
+                "surface-container-highest": "#353534",
+                "surface-dim": "#131313",
+                "on-primary-fixed-variant": "#004e60",
+                "on-secondary": "#460283",
+                "primary-container": "#00d1ff",
+                "inverse-surface": "#e5e2e1",
+                "outline": "#859399",
+                "tertiary-fixed-dim": "#c9c6c5",
+                "on-tertiary-fixed-variant": "#474646",
+                "on-secondary-container": "#cfa7ff",
+                "on-secondary-fixed": "#2a0053",
+                "tertiary-fixed": "#e5e2e1",
+                "on-error-container": "#ffdad6",
+                "secondary-fixed-dim": "#dab9ff",
+                "surface-variant": "#353534",
+                "on-surface-variant": "#bbc9cf",
+                "primary-fixed-dim": "#4cd6ff",
+                "secondary-fixed": "#eedbff",
+                "surface": "#131313",
+                "secondary-container": "#602b9d",
+                "on-tertiary-container": "#4f4e4e",
+                "on-primary-container": "#00566a",
+                "surface-container-high": "#2a2a2a",
+                "tertiary-container": "#c3c0bf",
+                "secondary": "#dab9ff",
+                "on-secondary-fixed-variant": "#5e289b",
+                "background": "#131313",
+                "on-primary-fixed": "#001f28",
+                "surface-container": "#201f1f",
+                "surface-bright": "#393939",
+                "on-tertiary": "#313030"
+        },
+        "borderRadius": {
+                "DEFAULT": "1rem",
+                "lg": "2rem",
+                "xl": "3rem",
+                "full": "9999px"
+        },
+        "spacing": {
+                "gutter": "16px",
+                "container-padding": "32px",
+                "unit": "8px",
+                "margin-mobile": "24px",
+                "margin-desktop": "64px"
+        },
+        "fontFamily": {
+                "display-lg": [
+                        "Space Grotesk"
+                ],
+                "body-lg": [
+                        "Atkinson Hyperlegible Next"
+                ],
+                "headline-md": [
+                        "Space Grotesk"
+                ],
+                "display-xl": [
+                        "Space Grotesk"
+                ],
+                "label-caps": [
+                        "Space Grotesk"
+                ],
+                "body-md": [
+                        "Atkinson Hyperlegible Next"
+                ]
+        },
+        "fontSize": {
+                "display-lg": [
+                        "36px",
+                        {
+                                "lineHeight": "1.2",
+                                "letterSpacing": "0.02em",
+                                "fontWeight": "600"
+                        }
+                ],
+                "body-lg": [
+                        "20px",
+                        {
+                                "lineHeight": "1.6",
+                                "letterSpacing": "0.01em",
+                                "fontWeight": "400"
+                        }
+                ],
+                "headline-md": [
+                        "24px",
+                        {
+                                "lineHeight": "1.3",
+                                "letterSpacing": "0.01em",
+                                "fontWeight": "500"
+                        }
+                ],
+                "display-xl": [
+                        "48px",
+                        {
+                                "lineHeight": "1.1",
+                                "letterSpacing": "0.02em",
+                                "fontWeight": "700"
+                        }
+                ],
+                "label-caps": [
+                        "14px",
+                        {
+                                "lineHeight": "1.0",
+                                "letterSpacing": "0.15em",
+                                "fontWeight": "600"
+                        }
+                ],
+                "body-md": [
+                        "18px",
+                        {
+                                "lineHeight": "1.5",
+                                "letterSpacing": "0.01em",
+                                "fontWeight": "400"
+                        }
+                ]
+        }
+},
+    },
+  }
+</script>
+<style>
+        body {
+            background-color: #050505;
+            color: #e5e2e1;
+            overflow: hidden;
+        }
+        .atmospheric-glow {
+            background: radial-gradient(circle at center, rgba(164, 230, 255, 0.05) 0%, transparent 70%);
+        }
+        .arrival-bloom {
+            background: radial-gradient(circle at center, rgba(164, 230, 255, 0.15) 0%, rgba(96, 43, 157, 0.2) 40%, transparent 80%);
+        }
+        .glass-card {
+            background: rgba(18, 18, 18, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
+        }
+        .light-leak {
+            background: linear-gradient(135deg, rgba(164, 230, 255, 0.1) 0%, transparent 50%);
+        }
+        .pulse-ring {
+            border: 1px solid rgba(164, 230, 255, 0.2);
+            border-radius: 50%;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md min-h-screen flex flex-col items-center justify-center p-6 relative">
+<!-- Top App Bar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-surface/80 dark:bg-surface/80 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(76,214,255,0.1)] rounded-b-lg">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary dark:text-primary text-headline-md" data-icon="spatial_audio">spatial_audio</span>
+<span class="text-headline-md font-display-lg font-bold text-primary dark:text-primary tracking-tighter">HearSight</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-label-caps font-label-caps text-on-surface-variant">Arrival Confirmed</span>
+<span class="material-symbols-outlined text-primary dark:text-primary p-2 rounded-full hover:bg-white/5 transition-all" data-icon="emergency">emergency</span>
+</div>
+</header>
+<!-- Main Content: Arrival Canvas -->
+<main class="w-full max-w-lg flex flex-col items-center gap-12 z-10">
+<!-- Spatial HUD / AI Orb Section -->
+<div class="relative w-72 h-72 flex items-center justify-center">
+<!-- Background Radial Glow -->
+<div class="absolute inset-[-100px] arrival-bloom opacity-80 pointer-events-none"></div>
+<!-- Concentric Radar Rings -->
+<div class="absolute w-full h-full pulse-ring scale-[1.2] opacity-20"></div>
+<div class="absolute w-full h-full pulse-ring scale-[1.5] opacity-10"></div>
+<!-- Central AI Orb -->
+<div class="relative w-48 h-48 rounded-full bg-surface shadow-[0_0_80px_rgba(164,230,255,0.4)] border border-primary/20 flex items-center justify-center overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-tr from-secondary-container/40 to-primary/20"></div>
+<span class="material-symbols-outlined text-primary text-[84px] drop-shadow-[0_0_20px_rgba(164,230,255,0.8)]" data-icon="spatial_audio" style="font-variation-settings: 'FILL' 1;">spatial_audio</span>
+<!-- Inner Orb Pulse Glow -->
+<div class="absolute inset-0 bg-primary/5 animate-pulse"></div>
+</div>
+</div>
+<!-- Headline Content -->
+<div class="text-center space-y-4">
+<h1 class="font-display-xl text-display-xl text-primary tracking-tight">YOU HAVE ARRIVED</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-sm mx-auto">Welcome to 128 Lexicon Square. Your destination is 3 meters to your right.</p>
+</div>
+<!-- Action Grid (Oversized Glassmorphic Targets) -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+<!-- Save Location Card -->
+<button class="group glass-card light-leak rounded-lg p-8 flex flex-col items-center gap-4 transition-all duration-300 hover:scale-[1.02] active:scale-95 border-primary/10 hover:border-primary/40">
+<div class="w-16 h-16 rounded-full bg-secondary-container/30 flex items-center justify-center text-secondary mb-2">
+<span class="material-symbols-outlined text-[32px]" data-icon="bookmark">bookmark</span>
+</div>
+<span class="font-display-lg text-headline-md text-on-surface">Save Location</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Add to favorites</span>
+</button>
+<!-- End Trip Card -->
+<button class="group glass-card light-leak rounded-lg p-8 flex flex-col items-center gap-4 transition-all duration-300 hover:scale-[1.02] active:scale-95 border-error/10 hover:border-error/40">
+<div class="w-16 h-16 rounded-full bg-error-container/30 flex items-center justify-center text-error mb-2">
+<span class="material-symbols-outlined text-[32px]" data-icon="logout">logout</span>
+</div>
+<span class="font-display-lg text-headline-md text-on-surface">End Trip</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Close navigation</span>
+</button>
+</div>
+</main>
+<!-- Visual Anchor: Map Preview (Subtle) -->
+<div class="fixed inset-0 z-0 opacity-20 pointer-events-none">
+<img class="w-full h-full object-cover grayscale brightness-50" data-alt="A cinematic, high-contrast aerial night view of a glowing futuristic city grid with vibrant purple and electric blue light trails. The scene is shrouded in atmospheric fog and deep shadows, emphasizing a sophisticated sci-fi aesthetic. The lighting is moody and neon-drenched, creating a sense of arrival in a high-tech urban environment." data-location="Tokyo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAXXmZpyvGU53U13nyY20GvzC5OGCItsOTft56GrLqNmq1-gRP6QEtj26fpCNryCVtqfRtgYe9w_PzWLfgozsRPKkcDCqS-IRhCZEwkjYkHvRI2qQudI1zHMdI4yIsylg9bQqvYeM4HdhL9lLcBSqrsmKhEE551BPvGDmSwfUPrAF8MHdMhcetzZWMS3VuPuE3Lt6-wgkRo5Dt1ZDAF6Wy02_6kk6sdXlRXwkwAC57ugXGUVM36cFkGsDVboQd-xHDFUMQTr4YjGb1g"/>
+<div class="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background"></div>
+</div>
+<!-- Navigation Drawer (Predicted Shared Component) -->
+<aside class="fixed inset-y-0 left-0 z-[60] flex flex-col py-8 bg-surface dark:bg-surface docked left-0 h-full w-80 rounded-r-lg shadow-2xl -translate-x-full transition-transform duration-300" id="drawer">
+<div class="px-8 mb-12 flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center overflow-hidden">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A close-up portrait of a professional-looking person with a neutral expression, wearing high-tech sleek glasses that reflect a subtle electric blue glow. The background is a dark, out-of-focus futuristic lab with soft charcoal tones and atmospheric lighting. The style is minimalist and cinematic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBjuIQfWi1VR78sx7SWQOWcZYZSsHXr-On3XhBKvNS-xghZfnESX_KEwPuadaWgHhOeRBAYNFh8wm3AwzmHXE6fm867xoQvqQ9jlIybsJXdeP13ODmXfFN4ZiuCyIZY9kZPY8WyS7SsdK7gXBCWFGjvwdGKgQbHE2rtBcx1YCgWYT81biwOE7UrOoTsr7LuEJEO_LxeOlTsJ9pcaNTfdBjyj7usKBkUaxTwelmJ5arcWp503dyUFmZBKAcJHVxUxvBM74DqMyCbiHsI"/>
+</div>
+<div>
+<p class="font-display-lg text-headline-md text-primary">Navigator</p>
+<p class="font-body-md text-on-surface-variant">AI Active</p>
+</div>
+</div>
+<nav class="flex-1 flex flex-col gap-2">
+<div class="text-on-surface-variant hover:text-on-surface mx-2 px-6 py-4 flex items-center gap-4 hover:bg-white/5 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined" data-icon="location_on">location_on</span>
+<span class="font-body-lg text-body-lg">Nearby Landmarks</span>
+</div>
+<div class="bg-secondary-container text-on-secondary-container rounded-lg mx-2 px-6 py-4 flex items-center gap-4 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="bookmark">bookmark</span>
+<span class="font-body-lg text-body-lg">Saved Locations</span>
+</div>
+<div class="text-on-surface-variant hover:text-on-surface mx-2 px-6 py-4 flex items-center gap-4 hover:bg-white/5 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined" data-icon="record_voice_over">record_voice_over</span>
+<span class="font-body-lg text-body-lg">Voice Settings</span>
+</div>
+<div class="text-on-surface-variant hover:text-on-surface mx-2 px-6 py-4 flex items-center gap-4 hover:bg-white/5 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-body-lg text-body-lg">System Diagnostic</span>
+</div>
+</nav>
+<div class="px-8 mt-auto">
+<p class="text-label-caps font-label-caps text-on-surface-variant opacity-50">v2.4</p>
+</div>
+</aside>
+<!-- Bottom Nav Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-gutter pb-8 bg-surface-container/60 dark:bg-surface-container/60 backdrop-blur-2xl border border-white/5 shadow-[0_8px_32px_0_rgba(0,0,0,0.8)] floating rounded-xl mx-margin-mobile mb-8 md:hidden">
+<button class="flex items-center justify-center text-on-surface-variant w-12 h-12 hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+</button>
+<button class="flex items-center justify-center bg-primary text-on-primary rounded-full w-16 h-16 shadow-[0_0_15px_rgba(164,230,255,0.5)] active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-[32px]" data-icon="mic">mic</span>
+</button>
+<button class="flex items-center justify-center text-on-surface-variant w-12 h-12 hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</nav>
+<!-- Background Decorative Elements -->
+<div class="fixed top-1/4 right-1/4 w-96 h-96 bg-secondary-container/10 blur-[120px] rounded-full z-0"></div>
+<div class="fixed bottom-1/4 left-1/4 w-64 h-64 bg-primary/10 blur-[100px] rounded-full z-0"></div>
+</body></html>
