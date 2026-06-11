@@ -1,7 +1,16 @@
 import SwiftUI
 
+private enum CleanFlowRoute: Equatable {
+    case home
+    case confirmDestination
+    case preview
+    case guidance
+    case arrival
+}
+
 struct ContentView: View {
     @StateObject private var viewModel = WalkthroughViewModel()
+    @State private var cleanRoute: CleanFlowRoute = .home
     @FocusState private var isDestinationFocused: Bool
     @Environment(\.colorScheme) private var colorScheme
 
@@ -10,46 +19,103 @@ struct ContentView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                if viewModel.walkthrough == nil {
-                    warmDestinationEntry
-                } else {
-                    HearSightAmbientBackground()
+        Group {
+            switch cleanRoute {
+            case .home:
+                CleanHomeView(viewModel: viewModel, onPreview: showCleanPreview)
+            case .confirmDestination:
+                CleanConfirmDestinationView(
+                    viewModel: viewModel,
+                    onConfirm: continueToCleanPreview,
+                    onEdit: editCleanDestination
+                )
+            case .preview:
+                CleanPreviewView(viewModel: viewModel, onBeginGuidance: beginCleanGuidance)
+            case .guidance:
+                CleanGuidanceView(viewModel: viewModel, onArrival: showCleanArrival)
+            case .arrival:
+                CleanArrivalView(viewModel: viewModel, onSave: saveCleanArrival, onDone: finishCleanFlow)
+            }
+        }
+        .animation(.easeInOut(duration: 0.22), value: cleanRoute)
+        .onAppear {
+            viewModel.requestLocationAccess()
+            viewModel.checkBackend()
+        }
+        .alert("HearSight", isPresented: Binding(
+            get: { viewModel.errorMessage != nil },
+            set: { if !$0 { viewModel.errorMessage = nil } }
+        )) {
+            Button("OK", role: .cancel) {
+                viewModel.errorMessage = nil
+            }
+        } message: {
+            Text(viewModel.errorMessage ?? "")
+        }
+    }
 
-                    VStack(spacing: 0) {
-                        header
+    private func showCleanPreview() {
+        let destination = viewModel.destinationQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !destination.isEmpty else {
+            viewModel.statusMessage = "Enter a destination to preview the arrival."
+            return
+        }
 
-                        Group {
-                            if viewModel.flowState == .previewing {
-                                routePreview
-                            } else {
-                                guidanceSurface
-                            }
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    }
-                    .padding(.horizontal, 24)
-                    .padding(.top, 22)
-                    .padding(.bottom, 18)
-                }
+        viewModel.destinationQuery = destination
+        viewModel.generateWalkthrough()
+        withAnimation {
+            cleanRoute = .confirmDestination
+        }
+    }
+
+    private func continueToCleanPreview() {
+        guard viewModel.isCleanFlowDestinationRecognized else {
+            viewModel.statusMessage = "HearSight is still resolving this destination."
+            return
+        }
+
+        withAnimation {
+            cleanRoute = .preview
+        }
+    }
+
+    private func editCleanDestination() {
+        viewModel.cancelPreviewForEditing()
+        withAnimation {
+            cleanRoute = .home
+        }
+    }
+
+    private func beginCleanGuidance() {
+        guard viewModel.isCleanFlowDestinationRecognized else {
+            viewModel.statusMessage = "Confirm the recognized destination before guidance."
+            withAnimation {
+                cleanRoute = .confirmDestination
             }
-            .tint(theme.accent)
-            .navigationBarHidden(true)
-            .onAppear {
-                viewModel.requestLocationAccess()
-                viewModel.checkBackend()
-            }
-            .alert("HearSight", isPresented: Binding(
-                get: { viewModel.errorMessage != nil },
-                set: { if !$0 { viewModel.errorMessage = nil } }
-            )) {
-                Button("OK", role: .cancel) {
-                    viewModel.errorMessage = nil
-                }
-            } message: {
-                Text(viewModel.errorMessage ?? "")
-            }
+            return
+        }
+
+        viewModel.startGuidance()
+        withAnimation {
+            cleanRoute = .guidance
+        }
+    }
+
+    private func showCleanArrival() {
+        viewModel.hasArrived = true
+        viewModel.isGuiding = false
+        withAnimation {
+            cleanRoute = .arrival
+        }
+    }
+
+    private func saveCleanArrival() {
+        viewModel.saveArrivalMemory()
+    }
+
+    private func finishCleanFlow() {
+        withAnimation {
+            cleanRoute = .home
         }
     }
 

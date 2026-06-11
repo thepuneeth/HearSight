@@ -1,6 +1,121 @@
 import CoreLocation
 import Foundation
 
+enum TripPhase: String, CaseIterable {
+    case home
+    case preview
+    case guidance
+    case arrival
+    case completed
+}
+
+enum CueDensity: String, CaseIterable, Identifiable {
+    case quiet
+    case standard
+    case detailed
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .quiet:
+            return "Quiet"
+        case .standard:
+            return "Standard"
+        case .detailed:
+            return "Detailed"
+        }
+    }
+}
+
+enum ConfidenceLevel: String, CaseIterable, Identifiable {
+    case veryUnsure
+    case unsure
+    case okay
+    case confident
+    case veryConfident
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .veryUnsure:
+            return "Very unsure"
+        case .unsure:
+            return "Unsure"
+        case .okay:
+            return "Okay"
+        case .confident:
+            return "Confident"
+        case .veryConfident:
+            return "Very confident"
+        }
+    }
+}
+
+enum VoiceInputState: Equatable {
+    case idle
+    case listening
+    case processing
+    case success
+    case failure(String)
+    case unavailable(String)
+
+    var title: String {
+        switch self {
+        case .idle:
+            return "Idle"
+        case .listening:
+            return "Listening"
+        case .processing:
+            return "Processing"
+        case .success:
+            return "Success"
+        case .failure:
+            return "Failure"
+        case .unavailable:
+            return "Microphone unavailable"
+        }
+    }
+
+    var message: String {
+        switch self {
+        case .idle:
+            return "Tap the microphone or type a destination."
+        case .listening:
+            return "Listening for your destination."
+        case .processing:
+            return "Processing destination."
+        case .success:
+            return "Destination captured."
+        case .failure(let reason):
+            return reason
+        case .unavailable(let reason):
+            return reason
+        }
+    }
+
+    var isListening: Bool {
+        if case .listening = self { return true }
+        return false
+    }
+}
+
+struct ArrivalPreview {
+    let destinationName: String
+    let entranceNote: String
+    let whatToExpect: String
+    let landmarkChain: [String]
+    let trustedNote: String?
+    let isFirstVisit: Bool
+}
+
+struct ArrivalMemory {
+    var lastConfidence: ConfidenceLevel?
+    var futureNote: String
+    var isFamiliarPlace: Bool
+}
+
 struct CoordinatePayload: Codable, Hashable {
     let latitude: Double
     let longitude: Double
@@ -35,8 +150,16 @@ struct WalkthroughResponse: Codable, Identifiable {
     let id: String
     let language: String
     let generatedAt: String
+    var destination: WalkthroughDestination? = nil
     let routeSummary: RouteSummary
     let stages: [RouteStage]
+}
+
+struct WalkthroughDestination: Codable {
+    let name: String?
+    let formattedAddress: String?
+    let coordinate: CoordinatePayload?
+    let confidence: String?
 }
 
 struct RouteSummary: Codable {

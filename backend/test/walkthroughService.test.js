@@ -158,7 +158,7 @@ test("does not speak raw Street View or Mistral failures", async () => {
   }, "Street View status was ZERO_RESULTS.").spokenCue;
 
   assert.doesNotMatch(noStreetViewCue, /ZERO_RESULTS|Street View status/i);
-  assert.equal(noStreetViewCue, "Approaching Main Street. Street View unavailable; continue using your normal mobility tools.");
+  assert.equal(noStreetViewCue, "Street View is limited here. Use nearby context around Main Street and normal mobility tools.");
 
   const mistralCue = fallbackDescription({
     routeInstruction: "Continue west.",
@@ -168,6 +168,65 @@ test("does not speak raw Street View or Mistral failures", async () => {
   }, "Mistral description request failed with status 500").spokenCue;
 
   assert.doesNotMatch(mistralCue, /Mistral|500|failed/i);
+});
+
+test("polishes repeated weak fallback stages before returning walkthrough", async () => {
+  const destination = { latitude: 41.8840, longitude: -87.6200 };
+  const walkthrough = await createWalkthrough({
+    request: {
+      origin: { latitude: 41.8781, longitude: -87.6298 },
+      destination
+    },
+    config: {
+      useMocks: false,
+      publicBaseUrl: "http://localhost:8787",
+      maxStages: 8,
+      checkpointSpacingMeters: 120,
+      descriptionConcurrency: 1
+    },
+    googleMapsClient: {
+      computeWalkingRoute: async () => ({
+        ...mockRoute(destination),
+        distanceMeters: 900,
+        overviewCoordinates: [
+          { latitude: 41.8781, longitude: -87.6298 },
+          { latitude: 41.8800, longitude: -87.6260 },
+          destination
+        ],
+        steps: [{
+          distanceMeters: 900,
+          duration: "900s",
+          instruction: "Walk toward the destination on Unnamed Road.",
+          startLocation: { latitude: 41.8781, longitude: -87.6298 },
+          endLocation: destination,
+          polylineCoordinates: [
+            { latitude: 41.8781, longitude: -87.6298 },
+            { latitude: 41.8800, longitude: -87.6260 },
+            destination
+          ]
+        }]
+      }),
+      reverseGeocode: async () => ({
+        streetName: "Unnamed Road",
+        nearestIntersection: "Unnamed Road"
+      }),
+      getNearbyLandmarks: async () => ["traffic", "Millennium Park"],
+      getStreetViewMetadata: async ({ coordinate }) => ({ status: "ZERO_RESULTS", coordinate }),
+      fetchStreetViewImage: async () => ({ bytes: Buffer.from("image"), contentType: "image/jpeg" })
+    },
+    describer: {
+      describeImage: async () => {
+        throw new Error("should not be called");
+      }
+    }
+  });
+
+  assert.ok(walkthrough.stages.length <= 8);
+  assert.equal(walkthrough.routeSummary.stageCount, walkthrough.stages.length);
+  assert.equal(walkthrough.stages.at(-1).kind, "destination");
+  assert.doesNotMatch(JSON.stringify(walkthrough), /Unnamed Road|No Street View image is available/i);
+  assert.ok(walkthrough.stages.some((stage) => stage.description.landmarks.includes("Millennium Park")));
+  assert.ok(walkthrough.stages.every((stage) => !stage.description.landmarks.includes("traffic")));
 });
 
 test("uses mock walkthroughs without external services", async () => {

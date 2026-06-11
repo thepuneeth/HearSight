@@ -17,6 +17,12 @@
 		010000000000000000000109 /* Views/StageRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 010000000000000000000209 /* Views/StageRowView.swift */; };
 		010000000000000000000110 /* Resources/Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 010000000000000000000210 /* Resources/Assets.xcassets */; };
 		010000000000000000000111 /* Views/HearSightVisualSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 010000000000000000000211 /* Views/HearSightVisualSystem.swift */; };
+		010000000000000000000112 /* Views/CleanFlow/CleanHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 010000000000000000000212 /* Views/CleanFlow/CleanHomeView.swift */; };
+		010000000000000000000113 /* Views/CleanFlow/CleanPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 010000000000000000000213 /* Views/CleanFlow/CleanPreviewView.swift */; };
+		010000000000000000000114 /* Views/CleanFlow/CleanGuidanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 010000000000000000000214 /* Views/CleanFlow/CleanGuidanceView.swift */; };
+		010000000000000000000115 /* Views/CleanFlow/CleanArrivalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 010000000000000000000215 /* Views/CleanFlow/CleanArrivalView.swift */; };
+		010000000000000000000116 /* Views/CleanFlow/CleanComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 010000000000000000000216 /* Views/CleanFlow/CleanComponents.swift */; };
+		010000000000000000000117 /* Views/CleanFlow/CleanConfirmDestinationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 010000000000000000000217 /* Views/CleanFlow/CleanConfirmDestinationView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +36,12 @@
 		010000000000000000000209 /* Views/StageRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/StageRowView.swift; sourceTree = "<group>"; };
 		010000000000000000000210 /* Resources/Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Resources/Assets.xcassets; sourceTree = "<group>"; };
 		010000000000000000000211 /* Views/HearSightVisualSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/HearSightVisualSystem.swift; sourceTree = "<group>"; };
+		010000000000000000000212 /* Views/CleanFlow/CleanHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleanHomeView.swift; sourceTree = "<group>"; };
+		010000000000000000000213 /* Views/CleanFlow/CleanPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleanPreviewView.swift; sourceTree = "<group>"; };
+		010000000000000000000214 /* Views/CleanFlow/CleanGuidanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleanGuidanceView.swift; sourceTree = "<group>"; };
+		010000000000000000000215 /* Views/CleanFlow/CleanArrivalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleanArrivalView.swift; sourceTree = "<group>"; };
+		010000000000000000000216 /* Views/CleanFlow/CleanComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleanComponents.swift; sourceTree = "<group>"; };
+		010000000000000000000217 /* Views/CleanFlow/CleanConfirmDestinationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleanConfirmDestinationView.swift; sourceTree = "<group>"; };
 		010000000000000000000301 /* HearSight.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HearSight.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -64,9 +76,23 @@
 				010000000000000000000208 /* Views/ContentView.swift */,
 				010000000000000000000209 /* Views/StageRowView.swift */,
 				010000000000000000000211 /* Views/HearSightVisualSystem.swift */,
+				010000000000000000000004 /* Views/CleanFlow */,
 				010000000000000000000210 /* Resources/Assets.xcassets */,
 			);
 			path = HearSight;
+			sourceTree = "<group>";
+		};
+		010000000000000000000004 /* Views/CleanFlow */ = {
+			isa = PBXGroup;
+			children = (
+				010000000000000000000216 /* Views/CleanFlow/CleanComponents.swift */,
+				010000000000000000000212 /* Views/CleanFlow/CleanHomeView.swift */,
+				010000000000000000000217 /* Views/CleanFlow/CleanConfirmDestinationView.swift */,
+				010000000000000000000213 /* Views/CleanFlow/CleanPreviewView.swift */,
+				010000000000000000000214 /* Views/CleanFlow/CleanGuidanceView.swift */,
+				010000000000000000000215 /* Views/CleanFlow/CleanArrivalView.swift */,
+			);
+			path = Views/CleanFlow;
 			sourceTree = "<group>";
 		};
 		010000000000000000000003 /* Products */ = {
@@ -155,6 +181,12 @@
 				010000000000000000000108 /* Views/ContentView.swift in Sources */,
 				010000000000000000000109 /* Views/StageRowView.swift in Sources */,
 				010000000000000000000111 /* Views/HearSightVisualSystem.swift in Sources */,
+				010000000000000000000116 /* Views/CleanFlow/CleanComponents.swift in Sources */,
+				010000000000000000000112 /* Views/CleanFlow/CleanHomeView.swift in Sources */,
+				010000000000000000000117 /* Views/CleanFlow/CleanConfirmDestinationView.swift in Sources */,
+				010000000000000000000113 /* Views/CleanFlow/CleanPreviewView.swift in Sources */,
+				010000000000000000000114 /* Views/CleanFlow/CleanGuidanceView.swift in Sources */,
+				010000000000000000000115 /* Views/CleanFlow/CleanArrivalView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
