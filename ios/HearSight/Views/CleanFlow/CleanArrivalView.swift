@@ -24,7 +24,8 @@ struct CleanArrivalView: View {
             CleanCueCard(
                 title: "Correct entrance",
                 cue: data.entranceCue,
-                systemImage: "door.left.hand.open"
+                systemImage: "door.left.hand.open",
+                onHear: { viewModel.speakImmediate(data.entranceCue) }
             )
 
             CleanLandmarkChainCard(landmarks: data.landmarkChain)
@@ -76,6 +77,7 @@ struct CleanArrivalView: View {
             CleanPrimaryButton(
                 title: didSave ? "Done" : "Save Arrival Confidence",
                 systemImage: didSave ? "house.fill" : "checkmark.circle.fill",
+                accessibilityLabel: didSave ? "Done" : "Save Confidence",
                 accessibilityHint: didSave ? "Returns to the start screen." : "Saves your confidence level and note."
             ) {
                 if didSave {
@@ -99,7 +101,7 @@ struct CleanArrivalView: View {
             "Landmarks: \(data.landmarkChain.joined(separator: ", "))."
         ]
         .joined(separator: " ")
-        viewModel.speakImmediate(cue)
+        viewModel.speakImmediate("Repeating arrival cues. \(cue)")
     }
 
     private func saveArrivalConfidence() {
@@ -108,6 +110,7 @@ struct CleanArrivalView: View {
         }
         onSave()
         didSave = true
+        viewModel.speakAccessibilityPrompt("Arrival confidence saved.")
     }
 }
 

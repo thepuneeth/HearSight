@@ -41,11 +41,11 @@ test("sends Street View images to Mistral chat completions with JSON schema outp
   assert.equal(capturedUrl, "https://api.mistral.ai/v1/chat/completions");
   assert.equal(capturedRequest.model, "mistral-medium-2505");
   assert.equal(capturedRequest.response_format.type, "json_schema");
-  assert.match(capturedRequest.messages[0].content, /1-2 short sentences maximum/);
+  assert.match(capturedRequest.messages[0].content, /2-3 sentences/);
   assert.match(capturedRequest.messages[0].content, /not live safety guidance/i);
   assert.doesNotMatch(capturedRequest.messages[0].content, /image may be outdated/i);
-  assert.match(capturedRequest.messages[1].content[0].text, /1-2 short sentences/);
-  assert.match(capturedRequest.messages[1].content[0].text, /stable orientation context/);
+  assert.match(capturedRequest.messages[1].content[0].text, /2-3 sentences/);
+  assert.match(capturedRequest.messages[1].content[0].text, /sensory or surface cue/);
   assert.equal(capturedRequest.messages[1].content[1].type, "image_url");
   assert.match(capturedRequest.messages[1].content[1].image_url, /^data:image\/jpeg;base64,/);
   assert.equal(description.confidence, 0.7);

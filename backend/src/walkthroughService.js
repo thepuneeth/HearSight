@@ -106,12 +106,22 @@ async function describeStage(stage, language, googleMapsClient, describer) {
           fallbackReason: "Street View imagery was not available nearby."
         }
       };
-      return {
-        ...fallbackStage,
-        snapshotUrl: null,
-        streetView: null,
-        description: fallbackDescription(fallbackStage, fallbackStage.context.fallbackReason)
-      };
+      try {
+        const description = await describer.describeWithText({
+          stage: fallbackStage,
+          context: fallbackStage.context,
+          language
+        });
+        return { ...fallbackStage, snapshotUrl: null, streetView: null, description };
+      } catch (textError) {
+        console.error("[HearSight] describeWithText failed:", textError?.message || textError);
+        return {
+          ...fallbackStage,
+          snapshotUrl: null,
+          streetView: null,
+          description: fallbackDescription(fallbackStage, fallbackStage.context.fallbackReason)
+        };
+      }
     }
 
     const image = await googleMapsClient.fetchStreetViewImage({
@@ -255,27 +265,34 @@ function capPolishedStages(stages, maxStages) {
   const start = stages[0];
   const routeDistance = destination?.routeDistanceMeters ||
     Math.max(...stages.map((stage) => stage.routeDistanceMeters || 0));
-  const finalApproachStart = Math.max(0, routeDistance - 350);
+
+  // Scale final approach with route length: 15% of route, min 350m, max 1500m
+  const finalApproachLength = Math.min(Math.max(routeDistance * 0.15, 350), 1500);
+  const finalApproachStart = Math.max(0, routeDistance - finalApproachLength);
+
   const required = [start]
     .concat(stages.filter((stage) => stage.kind === "maneuver" && stage.routeDistanceMeters >= finalApproachStart))
     .concat(destination ? [destination] : [])
     .filter(Boolean);
   const requiredIds = new Set(required.map((stage) => stage.id));
-  const finalApproach = stages.filter((stage) =>
-    stage.routeDistanceMeters >= finalApproachStart && !requiredIds.has(stage.id)
+
+  const distantManeuvers = stages.filter((stage) =>
+    stage.kind === "maneuver" && !requiredIds.has(stage.id)
   );
-  const routeProgress = stages.filter((stage) =>
-    stage.routeDistanceMeters < finalApproachStart &&
+  const finalApproachCheckpoints = stages.filter((stage) =>
     stage.kind !== "destination" &&
+    stage.routeDistanceMeters >= finalApproachStart &&
     !requiredIds.has(stage.id)
   );
-  const routeBudget = routeDistance > 3200 ? 2 : routeDistance > 800 ? 1 : 0;
-  const finalBudget = Math.max(0, limit - required.length - routeBudget);
+
+  const remainingBudget = Math.max(0, limit - required.length);
+  const finalDetailBudget = Math.min(2, Math.floor(remainingBudget / 3));
+  const routeManeuverBudget = remainingBudget - finalDetailBudget;
 
   return [
     ...required,
-    ...evenlyPick(routeProgress, Math.max(0, Math.min(routeBudget, limit - required.length))),
-    ...evenlyPick(finalApproach, finalBudget)
+    ...evenlyPick(distantManeuvers, routeManeuverBudget),
+    ...evenlyPick(finalApproachCheckpoints, finalDetailBudget)
   ]
     .sort(compareStageDistance)
     .slice(0, limit);
@@ -338,7 +355,8 @@ function cleanDisplayText(value) {
     .replace(/\bUnnamed Road\b/gi, "the destination area")
     .replace(/\bnear the final approach near the final approach\b/gi, "near the destination area")
     .replace(/\bExpect the final approach near the final approach\b/gi, "Expect the final approach near the destination area")
-    .replace(/\bNo Street View image is available[^.]*\.?/gi, "Street View is limited here.")
+    .replace(/\bNo Street View image is available[^.]*\.?/gi, "Use route instructions and normal mobility tools.")
+    .replace(/\bStreet View is limited here[^.]*\.?/gi, "Use route instructions and normal mobility tools.")
     .replace(/\s+/g, " ")
     .replace(/\s+\./g, ".")
     .trim();

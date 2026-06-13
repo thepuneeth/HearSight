@@ -155,25 +155,50 @@ function preferFinalApproach(candidates, maxStages) {
   const destination = candidates.find((candidate) => candidate.kind === "destination") || candidates.at(-1);
   const start = candidates[0];
   const routeDistance = destination?.routeDistanceMeters || Math.max(...candidates.map((candidate) => candidate.routeDistanceMeters));
-  const finalApproachStart = Math.max(0, routeDistance - 350);
 
+  // Scale final approach with route length: 15% of route, min 350m, max 1500m
+  const finalApproachLength = Math.min(Math.max(routeDistance * 0.15, 350), 1500);
+  const finalApproachStart = Math.max(0, routeDistance - finalApproachLength);
+
+  // Always keep: start, destination, and every turn in the final approach
   const required = [start]
     .concat(candidates.filter((candidate) => candidate.kind === "maneuver" && candidate.routeDistanceMeters >= finalApproachStart))
     .concat(destination ? [destination] : [])
     .filter(Boolean);
 
   const requiredKeys = new Set(required.map(candidateKey));
-  const finalApproach = candidates.filter((candidate) =>
-    candidate.routeDistanceMeters >= finalApproachStart && !requiredKeys.has(candidateKey(candidate))
+
+  // Early zone: prefer maneuvers; fall back to checkpoints if none exist
+  const earlyManeuvers = candidates.filter((candidate) =>
+    candidate.kind === "maneuver" &&
+    candidate.routeDistanceMeters < finalApproachStart &&
+    !requiredKeys.has(candidateKey(candidate))
   );
-  const distantManeuvers = candidates.filter((candidate) =>
-    candidate.kind === "maneuver" && !requiredKeys.has(candidateKey(candidate))
+  const earlyCheckpoints = candidates.filter((candidate) =>
+    candidate.kind === "checkpoint" &&
+    candidate.routeDistanceMeters < finalApproachStart &&
+    !requiredKeys.has(candidateKey(candidate))
   );
+  const earlySlotCandidates = earlyManeuvers.length > 0 ? earlyManeuvers : earlyCheckpoints;
+
+  const finalApproachCheckpoints = candidates.filter((candidate) =>
+    candidate.kind === "checkpoint" &&
+    candidate.routeDistanceMeters >= finalApproachStart &&
+    !requiredKeys.has(candidateKey(candidate))
+  );
+
+  const remainingBudget = Math.max(0, maxStages - required.length);
+  const finalDetailBudget = Math.min(2, Math.floor(remainingBudget / 3));
+  const routeManeuverBudget = remainingBudget - finalDetailBudget;
+
+  const earlyPicked = evenlyPick(earlySlotCandidates, routeManeuverBudget);
+  const spillover = routeManeuverBudget - earlyPicked.length;
+  const finalPicked = evenlyPick(finalApproachCheckpoints, finalDetailBudget + spillover);
 
   return uniqueCandidates([
     ...required,
-    ...evenlyPick(finalApproach, Math.max(0, maxStages - required.length)),
-    ...evenlyPick(distantManeuvers, Math.max(0, Math.min(2, maxStages - required.length - finalApproach.length)))
+    ...earlyPicked,
+    ...finalPicked
   ]).sort(compareCandidates);
 }
 

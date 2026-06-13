@@ -45,7 +45,8 @@ struct CleanPreviewView: View {
                 CleanCueCard(
                     title: "Entrance cue",
                     cue: data.entranceCue,
-                    systemImage: "door.left.hand.open"
+                    systemImage: "door.left.hand.open",
+                    onHear: { viewModel.speakImmediate(data.entranceCue) }
                 )
 
                 CleanCard(title: "What to expect", systemImage: "ear") {
@@ -78,10 +79,11 @@ struct CleanPreviewView: View {
             }
         } bottomAction: {
             CleanPrimaryButton(
-                title: viewModel.isCleanFlowDestinationRecognized ? "Begin Guidance" : "Resolving Destination",
+                title: viewModel.isCleanFlowDestinationRecognized ? "Start Guidance" : "Resolving Destination",
                 systemImage: "figure.walk",
+                accessibilityLabel: "Start Guidance",
                 accessibilityHint: viewModel.isCleanFlowDestinationRecognized
-                    ? "Begin Guidance. Starts the simple guidance controls."
+                    ? "Start Guidance. Starts the simple guidance controls."
                     : "Wait until HearSight recognizes the destination."
             ) {
                 onBeginGuidance()

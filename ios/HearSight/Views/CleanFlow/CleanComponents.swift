@@ -57,7 +57,7 @@ struct CleanFlowBriefing {
     var isPreparing = false
     var fallbackMessage: String?
 
-    static let streetViewLimitation = "Street View is limited here. Use the landmark chain and normal mobility tools near arrival."
+    static let streetViewLimitation = "Use the landmark chain and normal mobility tools near arrival."
 
     private struct CleanLandmarkCandidate {
         let text: String
@@ -231,11 +231,20 @@ struct CleanFlowBriefing {
     private static func realCue(from stage: RouteStage?) -> String? {
         guard let stage else { return nil }
         let spoken = cleanText(stage.description.spokenCue, fallback: "")
+        let instruction = cleanText(stage.routeInstruction, fallback: "")
+
+        if !spoken.isEmpty && spoken != streetViewLimitation {
+            return spoken
+        }
+
+        if !instruction.isEmpty {
+            return instruction
+        }
+
         if !spoken.isEmpty {
             return spoken
         }
 
-        let instruction = cleanText(stage.routeInstruction, fallback: "")
         return instruction.isEmpty ? nil : instruction
     }
 
@@ -719,6 +728,7 @@ struct CleanScreenHeader: View {
         }
         .frame(maxWidth: .infinity, alignment: frameAlignment)
         .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isHeader)
     }
 
     private var stackAlignment: HorizontalAlignment {
@@ -807,6 +817,7 @@ struct CleanPrimaryButton: View {
 
     let title: String
     var systemImage: String = "arrow.right.circle.fill"
+    var accessibilityLabel: String?
     var accessibilityHint: String?
     let action: () -> Void
 
@@ -823,7 +834,7 @@ struct CleanPrimaryButton: View {
                 .clipShape(RoundedRectangle(cornerRadius: HearSightTheme.Radius.md, style: .continuous))
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(title)
+        .accessibilityLabel(accessibilityLabel ?? title)
         .accessibilityHint(accessibilityHint ?? "")
     }
 }
@@ -904,16 +915,29 @@ struct CleanCueCard: View {
     let cue: String
     var systemImage: String = "waveform"
     var compact = false
+    var onHear: (() -> Void)? = nil
 
     var body: some View {
         CleanCard(title: title, systemImage: systemImage) {
-            Text(cue)
-                .font(.system(compact ? .body : .title2, design: .rounded).weight(compact ? .medium : .semibold))
-                .foregroundStyle(.primary)
-                .lineSpacing(compact ? 2 : 4)
-                .fixedSize(horizontal: false, vertical: true)
+            VStack(alignment: .leading, spacing: HearSightTheme.Spacing.xs) {
+                Text(cue)
+                    .font(.system(compact ? .body : .title2, design: .rounded).weight(compact ? .medium : .semibold))
+                    .foregroundStyle(.primary)
+                    .lineSpacing(compact ? 2 : 4)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                if onHear != nil {
+                    Text("Tap to hear")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.teal)
+                }
+            }
         }
         .accessibilityLabel("\(title). \(cue)")
+        .accessibilityHint(onHear != nil ? "Double tap to hear this cue." : "")
+        .accessibilityAddTraits(onHear != nil ? .isButton : [])
+        .onTapGesture { onHear?() }
     }
 }
 

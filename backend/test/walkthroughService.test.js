@@ -158,7 +158,8 @@ test("does not speak raw Street View or Mistral failures", async () => {
   }, "Street View status was ZERO_RESULTS.").spokenCue;
 
   assert.doesNotMatch(noStreetViewCue, /ZERO_RESULTS|Street View status/i);
-  assert.equal(noStreetViewCue, "Street View is limited here. Use nearby context around Main Street and normal mobility tools.");
+  assert.equal(noStreetViewCue, "Continue west. You are on Main Street.");
+  assert.doesNotMatch(noStreetViewCue, /Street View/i);
 
   const mistralCue = fallbackDescription({
     routeInstruction: "Continue west.",

@@ -38,6 +38,9 @@ struct ContentView: View {
             }
         }
         .animation(.easeInOut(duration: 0.22), value: cleanRoute)
+        .onChange(of: cleanRoute) { _, _ in
+            UIAccessibility.post(notification: .screenChanged, argument: nil)
+        }
         .onAppear {
             viewModel.requestLocationAccess()
             viewModel.checkBackend()
@@ -62,6 +65,8 @@ struct ContentView: View {
         }
 
         viewModel.destinationQuery = destination
+        viewModel.speakDestinationEnteredIfNeeded()
+        viewModel.speakAccessibilityPrompt("Creating your arrival preview. This may take a moment.")
         viewModel.generateWalkthrough()
         withAnimation {
             cleanRoute = .confirmDestination
@@ -104,6 +109,10 @@ struct ContentView: View {
     private func showCleanArrival() {
         viewModel.hasArrived = true
         viewModel.isGuiding = false
+        viewModel.speakAccessibilityPrompt(
+            "Arrival assistance opened. You have reached the arrival area. Please use your normal mobility tools and surroundings to confirm the exact entrance.",
+            interrupt: true
+        )
         withAnimation {
             cleanRoute = .arrival
         }

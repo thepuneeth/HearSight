@@ -54,7 +54,7 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
     @Published var pausedForOffRoute = false
     @Published var flowState: RouteFlowState = .destinationEntry
     @Published var isListeningForDestination = false
-    @Published var speechRecognitionStatus = "Tap the microphone and speak a destination."
+    @Published var speechRecognitionStatus = "Double tap the screen to activate the microphone."
     @Published var voiceInputState: VoiceInputState = .idle
     @Published var isFirstVisit = true
     @Published var cueDensity: CueDensity = .standard
@@ -83,8 +83,12 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
     private var previewTask: Task<Void, Never>?
     private var fallbackPreviewTask: Task<Void, Never>?
     private var locationWaitTask: Task<Void, Never>?
+    private var previewStillWorkingSpeechTask: Task<Void, Never>?
     private var activePreviewKey: String?
     private var isWaitingForLocationToGenerate = false
+    private var hasSpokenHomeIntro = false
+    private var lastSpokenDestinationEntry: String?
+    private var lastSpokenPreviewReadyID: String?
 
     private static var walkthroughCache: [String: WalkthroughResponse] = [:]
 
@@ -224,6 +228,35 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
         locationManager.startUpdatingHeading()
     }
 
+    func speakHomeIntroIfNeeded() {
+        guard !hasSpokenHomeIntro else { return }
+        hasSpokenHomeIntro = true
+        speakAccessibilityPrompt(
+            "Welcome to HearSight. Double tap the screen to activate the microphone, or type your destination below.",
+            interrupt: true
+        )
+    }
+
+    func speakAccessibilityPrompt(_ text: String, interrupt: Bool = false) {
+        speak(text, immediate: interrupt)
+        if UIAccessibility.isVoiceOverRunning {
+            UIAccessibility.post(notification: .announcement, argument: text)
+        }
+    }
+
+    func speakDestinationEnteredIfNeeded() {
+        let destination = destinationQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !destination.isEmpty, destination != lastSpokenDestinationEntry else { return }
+        lastSpokenDestinationEntry = destination
+        speakAccessibilityPrompt("Destination entered. Press Preview Arrival to continue.")
+    }
+
+    private func speakPreviewReadyIfNeeded(for walkthrough: WalkthroughResponse) {
+        guard walkthrough.id != lastSpokenPreviewReadyID else { return }
+        lastSpokenPreviewReadyID = walkthrough.id
+        speakAccessibilityPrompt("Arrival preview ready. Review the cues, then press Start Guidance when ready.")
+    }
+
     func toggleDestinationVoiceInput() {
         if isListeningForDestination {
             stopDestinationListening(confirm: true)
@@ -280,6 +313,7 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
                 destinationQuery = destination
                 speechRecognitionStatus = "Destination captured."
                 voiceInputState = .success
+                speakDestinationEnteredIfNeeded()
             }
         } else if destinationQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             voiceInputState = .idle
@@ -302,6 +336,7 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
         previewTask?.cancel()
         fallbackPreviewTask?.cancel()
         locationWaitTask?.cancel()
+        previewStillWorkingSpeechTask?.cancel()
         resolvedDestinationName = query
         hasArrived = false
         hasStartedGuidance = false
@@ -328,6 +363,7 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
             isPreviewLoading = false
             isRefreshingPreview = true
             statusMessage = "Cached preview ready. Refreshing arrival details."
+            speakPreviewReadyIfNeeded(for: cached)
             debugDestinationLog("Using cached walkthrough for \(query)")
         } else {
             statusMessage = "Preparing arrival preview."
@@ -346,6 +382,7 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
         let language = Locale.current.identifier
 
         scheduleFallbackPreview(for: query, cacheKey: cacheKey)
+        schedulePreviewStillWorkingPrompt(cacheKey: cacheKey)
         debugDestinationLog("Request destination: \(query)")
 
         previewTask = Task {
@@ -365,6 +402,7 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
                 await MainActor.run {
                     guard self.activePreviewKey == cacheKey, !Task.isCancelled else { return }
                     self.fallbackPreviewTask?.cancel()
+                    self.previewStillWorkingSpeechTask?.cancel()
                     Self.walkthroughCache[cacheKey] = response
                     self.backendHealth = health
                     self.resolvedDestinationName = response.destination?.name ?? response.destination?.formattedAddress ?? query
@@ -376,12 +414,14 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
                     self.isPreviewLoading = false
                     self.isRefreshingPreview = false
                     self.statusMessage = "Arrival preview ready with \(response.stages.count) cues."
+                    self.speakPreviewReadyIfNeeded(for: response)
                     self.debugDestinationLog("Real walkthrough installed for \(query) with \(response.stages.count) cues.")
                 }
             } catch {
                 await MainActor.run {
                     guard self.activePreviewKey == cacheKey, !Task.isCancelled else { return }
                     self.fallbackPreviewTask?.cancel()
+                    self.previewStillWorkingSpeechTask?.cancel()
                     self.previewUnavailable = true
                     self.isGenerating = false
                     self.isPreviewLoading = false
@@ -401,6 +441,7 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
         previewTask?.cancel()
         fallbackPreviewTask?.cancel()
         locationWaitTask?.cancel()
+        previewStillWorkingSpeechTask?.cancel()
         activePreviewKey = nil
         isWaitingForLocationToGenerate = false
         isGenerating = false
@@ -489,6 +530,7 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
         previewTask?.cancel()
         fallbackPreviewTask?.cancel()
         locationWaitTask?.cancel()
+        previewStillWorkingSpeechTask?.cancel()
         isWaitingForLocationToGenerate = false
         walkthrough = nil
         resolvedDestinationName = nil
@@ -552,6 +594,7 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
         synthesizer.stopSpeaking(at: .immediate)
         isSpeaking = false
         statusMessage = "Guidance paused."
+        speakAccessibilityPrompt("Guidance paused.")
     }
 
     func playArrivalPreview() {
@@ -643,7 +686,10 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
             isGuiding = false
             flowState = .routeComplete
             statusMessage = "Route complete."
-            speak("Route complete. Confirm the destination with your normal mobility tools.")
+            speakAccessibilityPrompt(
+                "You have reached the arrival area. Please use your normal mobility tools and surroundings to confirm the exact entrance.",
+                interrupt: true
+            )
             performHaptic(.straight)
             return
         }
@@ -700,6 +746,21 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
         }
     }
 
+    private func schedulePreviewStillWorkingPrompt(cacheKey: String) {
+        previewStillWorkingSpeechTask = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: 12_000_000_000)
+            await MainActor.run { [weak self] in
+                guard let self,
+                      self.activePreviewKey == cacheKey,
+                      self.isGenerating else {
+                    return
+                }
+
+                self.speakAccessibilityPrompt("Still working. HearSight is gathering route and arrival details.")
+            }
+        }
+    }
+
     private func scheduleLocationWaitTimeout(for destination: String, cacheKey: String) {
         locationWaitTask = Task { [weak self] in
             try? await Task.sleep(nanoseconds: 12_000_000_000)
@@ -744,7 +805,7 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
 
-        if synthesizer.isSpeaking || immediate {
+        if immediate {
             synthesizer.stopSpeaking(at: .immediate)
         }
 
@@ -816,6 +877,7 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
             speechRecognitionStatus = "Listening..."
             voiceInputState = .listening
             statusMessage = "Listening for your destination."
+            speakAccessibilityPrompt("Listening. Say your destination now.", interrupt: true)
         } catch {
             showMicrophoneUnavailableMessage()
         }
@@ -823,7 +885,7 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
 
     private func configureAudioSessionForSpeech() throws {
         let audioSession = AVAudioSession.sharedInstance()
-        try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
+        try audioSession.setCategory(.playAndRecord, mode: .measurement, options: [.duckOthers, .defaultToSpeaker])
         try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
     }
 
@@ -840,9 +902,12 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
 
     private func cleanRecognizedDestination(_ text: String) -> String? {
         var cleaned = text
+            .replacingOccurrences(of: "say your destination now", with: "", options: [.caseInsensitive])
+            .replacingOccurrences(of: "say your", with: "", options: [.caseInsensitive])
             .replacingOccurrences(of: "listening for destination", with: "", options: [.caseInsensitive])
             .replacingOccurrences(of: "listening", with: "", options: [.caseInsensitive])
             .replacingOccurrences(of: "destination", with: "", options: [.caseInsensitive])
+            .replacingOccurrences(of: "now", with: "", options: [.caseInsensitive])
             .trimmingCharacters(in: .whitespacesAndNewlines)
 
         while cleaned.contains("  ") {
@@ -860,24 +925,24 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
             mockStage(
                 index: 0,
                 coordinate: baseCoordinate,
-                instruction: "Begin with the clearest route edge toward \(destination).",
-                cue: "Start toward \(destination). Use available route guidance and listen for nearby traffic or entrance activity.",
+                instruction: "Begin heading toward \(destination).",
+                cue: "Start heading toward \(destination). Stay on the sidewalk and listen for traffic to your left and right to stay oriented.",
                 landmarks: ["Main entrance area"],
                 kind: .maneuver
             ),
             mockStage(
                 index: 1,
                 coordinate: CLLocationCoordinate2D(latitude: baseCoordinate.latitude + 0.0002, longitude: baseCoordinate.longitude + 0.0002),
-                instruction: "Continue toward the destination area.",
-                cue: "As you get close, slow down and confirm the entrance using signage, landmarks, or a nearby person if needed.",
+                instruction: "Continue toward \(destination).",
+                cue: "As you get closer to \(destination), slow down. Listen for building entrances, a change in foot traffic, or any audible activity that signals you are near the right place.",
                 landmarks: ["Building front", "Pickup or parking area"],
                 kind: .checkpoint
             ),
             mockStage(
                 index: 2,
                 coordinate: CLLocationCoordinate2D(latitude: baseCoordinate.latitude + 0.0003, longitude: baseCoordinate.longitude + 0.0003),
-                instruction: "Find the main entrance area.",
-                cue: "Arrival search. Confirm the correct entrance with nearby signage, building entrances, and your normal mobility tools.",
+                instruction: "You have arrived at \(destination).",
+                cue: "You have arrived at \(destination). Stop and listen for building sounds, a doorway, or foot traffic entering and exiting to locate the correct entrance.",
                 landmarks: ["Main entrance area"],
                 kind: .destination
             )

@@ -5,6 +5,7 @@ struct CleanHomeView: View {
     let onPreview: () -> Void
 
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @FocusState private var isDestinationFocused: Bool
     @State private var validationMessage: String?
 
@@ -24,8 +25,8 @@ struct CleanHomeView: View {
                         Circle()
                             .fill(HearSightTheme.primary(colorScheme).opacity(viewModel.voiceInputState.isListening ? 0.24 : 0.14))
                             .frame(width: 176, height: 176)
-                            .scaleEffect(viewModel.voiceInputState.isListening ? 1.06 : 1)
-                            .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: viewModel.voiceInputState.isListening)
+                            .scaleEffect((!reduceMotion && viewModel.voiceInputState.isListening) ? 1.06 : 1)
+                            .animation(reduceMotion ? nil : .easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: viewModel.voiceInputState.isListening)
 
                         Circle()
                             .fill(HearSightTheme.primary(colorScheme))
@@ -38,9 +39,9 @@ struct CleanHomeView: View {
                     }
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Speak destination")
+                .accessibilityLabel("Microphone")
                 .accessibilityValue(viewModel.voiceInputState.title)
-                .accessibilityHint(viewModel.voiceInputState.isListening ? "Stops listening for your destination." : "Starts listening so you can speak a destination.")
+                .accessibilityHint(viewModel.voiceInputState.isListening ? "Double tap to stop listening." : "Double tap to start listening and speak your destination.")
 
                 CleanCard {
                     VStack(alignment: .leading, spacing: HearSightTheme.Spacing.sm) {
@@ -59,6 +60,7 @@ struct CleanHomeView: View {
                             .background(HearSightTheme.insetPanel(colorScheme))
                             .clipShape(RoundedRectangle(cornerRadius: HearSightTheme.Radius.md, style: .continuous))
                             .onSubmit {
+                                viewModel.speakDestinationEnteredIfNeeded()
                                 previewArrival()
                             }
                             .accessibilityLabel("Destination")
@@ -66,14 +68,7 @@ struct CleanHomeView: View {
                     }
                 }
 
-                Picker("Visit type", selection: $viewModel.isFirstVisit) {
-                    Text("First Visit").tag(true)
-                    Text("Familiar Route").tag(false)
-                }
-                .pickerStyle(.segmented)
-                .frame(minHeight: 52)
-                .accessibilityLabel("Visit type")
-                .accessibilityHint("Choose whether this is your first visit or a familiar route.")
+                visitTypeSelector
 
                 if let validationMessage {
                     Text(validationMessage)
@@ -88,12 +83,73 @@ struct CleanHomeView: View {
             CleanPrimaryButton(
                 title: viewModel.isGenerating ? "Preparing Arrival" : "Preview Arrival",
                 systemImage: "play.circle.fill",
+                accessibilityLabel: "Preview Arrival",
                 accessibilityHint: "Creates a short pre-trip arrival briefing."
             ) {
                 previewArrival()
             }
             .disabled(viewModel.isGenerating)
         }
+        .contentShape(Rectangle())
+        .onTapGesture(count: 2) {
+            viewModel.toggleDestinationVoiceInput()
+        }
+        .onAppear {
+            viewModel.speakHomeIntroIfNeeded()
+        }
+        .onChange(of: isDestinationFocused) { oldValue, newValue in
+            if oldValue && !newValue {
+                viewModel.speakDestinationEnteredIfNeeded()
+            }
+        }
+    }
+
+    private var visitTypeSelector: some View {
+        HStack(spacing: HearSightTheme.Spacing.sm) {
+            visitTypeButton(
+                title: "First Visit",
+                isSelected: viewModel.isFirstVisit,
+                accessibilityHint: "Selects first visit mode."
+            ) {
+                selectFirstVisit(true)
+            }
+
+            visitTypeButton(
+                title: "Familiar Route",
+                isSelected: !viewModel.isFirstVisit,
+                accessibilityHint: "Selects familiar route mode."
+            ) {
+                selectFirstVisit(false)
+            }
+        }
+        .accessibilityElement(children: .contain)
+    }
+
+    private func visitTypeButton(
+        title: String,
+        isSelected: Bool,
+        accessibilityHint: String,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(.body.weight(.bold))
+                .foregroundStyle(isSelected ? .white : HearSightTheme.primary(colorScheme))
+                .lineLimit(1)
+                .minimumScaleFactor(0.78)
+                .frame(maxWidth: .infinity)
+                .frame(minHeight: 54)
+                .background(isSelected ? HearSightTheme.primary(colorScheme) : HearSightTheme.insetPanel(colorScheme))
+                .clipShape(RoundedRectangle(cornerRadius: HearSightTheme.Radius.md, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: HearSightTheme.Radius.md, style: .continuous)
+                        .stroke(HearSightTheme.cardStroke(colorScheme), lineWidth: isSelected ? 0 : 1)
+                }
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(title)
+        .accessibilityValue(isSelected ? "Selected" : "Not selected")
+        .accessibilityHint(accessibilityHint)
     }
 
     private func previewArrival() {
@@ -107,7 +163,17 @@ struct CleanHomeView: View {
         validationMessage = nil
         isDestinationFocused = false
         viewModel.destinationQuery = destination
+        viewModel.speakDestinationEnteredIfNeeded()
         onPreview()
+    }
+
+    private func selectFirstVisit(_ isFirstVisit: Bool) {
+        viewModel.isFirstVisit = isFirstVisit
+        if isFirstVisit {
+            viewModel.speakAccessibilityPrompt("First Visit selected. HearSight will generate an arrival preview for this destination.")
+        } else {
+            viewModel.speakAccessibilityPrompt("Familiar Route selected. HearSight will use saved arrival notes if available.")
+        }
     }
 }
 
