@@ -538,9 +538,7 @@ struct CleanFlowBriefing {
 
     private static func containsDebugWording(_ text: String) -> Bool {
         let lowercased = text.lowercased()
-        return lowercased.contains("mock mode")
-            || lowercased.contains("mock cue")
-            || lowercased.contains("simulator testing")
+        return lowercased.contains("mock")
             || lowercased.contains("local preview only")
             || lowercased.contains("backend")
             || lowercased.contains("debug")

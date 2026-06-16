@@ -20,6 +20,7 @@ Fill in:
 
 ```sh
 GOOGLE_MAPS_API_KEY=...
+GOOGLE_TTS_VOICE=en-US-Wavenet-F
 MISTRAL_API_KEY=...
 MISTRAL_MODEL=mistral-medium-2505
 ```
@@ -30,6 +31,9 @@ Enable and allow these Google APIs on the backend key:
 - Street View Static API
 - Places API (New)
 - Geocoding API
+- Cloud Text-to-Speech API
+
+The backend uses Google WaveNet speech by default. If `GOOGLE_TTS_API_KEY` is not set, it reuses `GOOGLE_MAPS_API_KEY`, so the key must be allowed to call Cloud Text-to-Speech.
 
 Run real mode:
 

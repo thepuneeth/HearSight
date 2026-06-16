@@ -8,6 +8,8 @@ struct CleanHomeView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @FocusState private var isDestinationFocused: Bool
     @State private var validationMessage: String?
+    @State private var isManualLocationEditorPresented = false
+    @State private var manualLocationMessage: String?
 
     var body: some View {
         CleanStickyBottomContainer(contentBottomPadding: 132) {
@@ -17,6 +19,8 @@ struct CleanHomeView: View {
                     subtitle: "Preview the final approach before you leave.",
                     alignment: .center
                 )
+
+                currentLocationCard
 
                 Button {
                     viewModel.toggleDestinationVoiceInput()
@@ -77,6 +81,14 @@ struct CleanHomeView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .accessibilityLabel(validationMessage)
                 }
+
+                if let manualLocationMessage {
+                    Text(manualLocationMessage)
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(HearSightTheme.current(for: colorScheme).warning)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .accessibilityLabel(manualLocationMessage)
+                }
             }
             .frame(maxWidth: .infinity)
         } bottomAction: {
@@ -102,6 +114,39 @@ struct CleanHomeView: View {
                 viewModel.speakDestinationEnteredIfNeeded()
             }
         }
+        .sheet(isPresented: $isManualLocationEditorPresented) {
+            ManualCurrentLocationSheet(
+                viewModel: viewModel,
+                manualLocationMessage: $manualLocationMessage,
+                onDone: {
+                    isManualLocationEditorPresented = false
+                }
+            )
+        }
+    }
+
+    private var currentLocationCard: some View {
+        CleanCard(title: "Current location", systemImage: viewModel.currentLocationSystemImage) {
+            VStack(alignment: .leading, spacing: HearSightTheme.Spacing.xs) {
+                Text(viewModel.currentLocationTitle)
+                    .font(.body.weight(.bold))
+                    .foregroundStyle(.primary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Text(viewModel.currentLocationDetail)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .highPriorityGesture(
+            TapGesture(count: 3)
+                .onEnded {
+                    prepareManualLocationEditor()
+                }
+        )
+        .accessibilityLabel("Current location. \(viewModel.currentLocationTitle). \(viewModel.currentLocationDetail)")
+        .accessibilityHint("Triple tap to change the current location.")
     }
 
     private var visitTypeSelector: some View {
@@ -174,6 +219,138 @@ struct CleanHomeView: View {
         } else {
             viewModel.speakAccessibilityPrompt("Familiar Route selected. HearSight will use saved arrival notes if available.")
         }
+    }
+
+    private func prepareManualLocationEditor() {
+        if viewModel.manualCurrentLocationQuery.isEmpty {
+            viewModel.manualCurrentLocationQuery = viewModel.isUsingManualCurrentLocation ? viewModel.currentLocationTitle : ""
+        }
+        manualLocationMessage = nil
+        isManualLocationEditorPresented = true
+    }
+}
+
+private struct ManualCurrentLocationSheet: View {
+    @ObservedObject var viewModel: WalkthroughViewModel
+    @Binding var manualLocationMessage: String?
+    let onDone: () -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
+    @FocusState private var isLocationFocused: Bool
+
+    var body: some View {
+        NavigationStack {
+            VStack(alignment: .leading, spacing: HearSightTheme.Spacing.lg) {
+                CleanScreenHeader(
+                    title: "Current Location",
+                    subtitle: "Type or speak where you want the route to start.",
+                    alignment: .leading
+                )
+
+                Button {
+                    viewModel.toggleCurrentLocationVoiceInput()
+                } label: {
+                    Label(
+                        viewModel.isListeningForCurrentLocation ? "Listening" : "Speak current location",
+                        systemImage: viewModel.isListeningForCurrentLocation ? "waveform" : "mic.fill"
+                    )
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(minHeight: 58)
+                    .background(HearSightTheme.primary(colorScheme))
+                    .clipShape(RoundedRectangle(cornerRadius: HearSightTheme.Radius.md, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint(viewModel.isListeningForCurrentLocation ? "Stops listening." : "Starts listening for your current location.")
+
+                CleanCard {
+                    VStack(alignment: .leading, spacing: HearSightTheme.Spacing.sm) {
+                        Text("Current location")
+                            .font(.headline.weight(.semibold))
+                            .foregroundStyle(.secondary)
+
+                        TextField("Type current location", text: $viewModel.manualCurrentLocationQuery)
+                            .font(.system(.title2, design: .rounded).weight(.semibold))
+                            .textFieldStyle(.plain)
+                            .textContentType(.fullStreetAddress)
+                            .submitLabel(.done)
+                            .focused($isLocationFocused)
+                            .padding(.horizontal, HearSightTheme.Spacing.md)
+                            .frame(minHeight: 60)
+                            .background(HearSightTheme.insetPanel(colorScheme))
+                            .clipShape(RoundedRectangle(cornerRadius: HearSightTheme.Radius.md, style: .continuous))
+                            .onSubmit {
+                                setLocation()
+                            }
+                            .accessibilityLabel("Current location")
+                    }
+                }
+
+                if let manualLocationMessage {
+                    Text(manualLocationMessage)
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(HearSightTheme.current(for: colorScheme).warning)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Spacer()
+
+                CleanPrimaryButton(
+                    title: "Set Location",
+                    systemImage: "location.fill",
+                    accessibilityHint: "Uses this typed or spoken place as the current location."
+                ) {
+                    setLocation()
+                }
+
+                CleanSecondaryButton(
+                    title: "Use Live GPS",
+                    systemImage: "location.north.line.fill",
+                    accessibilityHint: "Returns to the device current location."
+                ) {
+                    manualLocationMessage = nil
+                    viewModel.stopCurrentLocationListening()
+                    viewModel.resumeLiveCurrentLocation()
+                    dismiss()
+                    onDone()
+                }
+            }
+            .padding(HearSightTheme.Spacing.lg)
+            .navigationTitle("Change Current Location")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Done") {
+                        viewModel.stopCurrentLocationListening()
+                        dismiss()
+                        onDone()
+                    }
+                }
+            }
+            .onAppear {
+                isLocationFocused = true
+            }
+            .onDisappear {
+                viewModel.stopCurrentLocationListening()
+            }
+        }
+    }
+
+    private func setLocation() {
+        let query = viewModel.manualCurrentLocationQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else {
+            manualLocationMessage = "Type or speak a current location first."
+            viewModel.statusMessage = "Type or speak a current location first."
+            return
+        }
+
+        manualLocationMessage = nil
+        viewModel.stopCurrentLocationListening(confirm: true)
+        viewModel.setManualCurrentLocation(from: query)
+        dismiss()
+        onDone()
     }
 }
 

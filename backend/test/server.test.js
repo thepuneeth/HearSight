@@ -27,6 +27,43 @@ test("returns clean 400 for missing or null coordinates", async () => {
   });
 });
 
+test("synthesizes TTS audio through Google WaveNet", async () => {
+  const calls = [];
+  const handler = createAppServer({
+    config: {
+      useMocks: false,
+      publicBaseUrl: "http://localhost",
+      googleTtsApiKey: "tts-key",
+      googleTtsVoice: "en-US-Wavenet-F",
+      googleTtsAudioEncoding: "MP3"
+    },
+    fetchImpl: async (url, options) => {
+      calls.push({ url, options });
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({ audioContent: Buffer.from("audio").toString("base64") })
+      };
+    }
+  });
+  const request = jsonRequest("/api/tts", {
+    text: "Turn left at the corner.",
+    language: "en-US"
+  });
+  const response = captureResponse();
+
+  await handler(request, response);
+
+  assert.equal(response.status, 200);
+  assert.equal(response.headers["Content-Type"], "audio/mpeg");
+  assert.equal(response.body, "audio");
+  assert.match(calls[0].url, /texttospeech\.googleapis\.com/);
+  const payload = JSON.parse(calls[0].options.body);
+  assert.equal(payload.voice.name, "en-US-Wavenet-F");
+  assert.equal(payload.voice.languageCode, "en-US");
+  assert.equal(payload.audioConfig.audioEncoding, "MP3");
+});
+
 function jsonRequest(url, body) {
   const request = Readable.from([Buffer.from(JSON.stringify(body))]);
   request.method = "POST";

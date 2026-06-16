@@ -3,6 +3,7 @@ import SwiftUI
 struct CleanGuidanceView: View {
     @ObservedObject var viewModel: WalkthroughViewModel
     let onArrival: () -> Void
+    let onEndRoute: () -> Void
 
     @State private var cleanCueIndex = 0
     @State private var feedbackMessage: String?
@@ -67,6 +68,15 @@ struct CleanGuidanceView: View {
                     accessibilityHint: isPaused ? "Resumes guidance." : "Pauses spoken guidance."
                 ) {
                     togglePause()
+                }
+
+                CleanIconButton(
+                    title: "End",
+                    systemImage: "xmark.circle.fill",
+                    accessibilityLabel: "End route",
+                    accessibilityHint: "Ends the current route and returns to destination entry."
+                ) {
+                    endRoute()
                 }
 
                 CleanIconButton(
@@ -174,6 +184,13 @@ struct CleanGuidanceView: View {
         onArrival()
     }
 
+    private func endRoute() {
+        isPaused = false
+        feedbackMessage = nil
+        viewModel.endRoute()
+        onEndRoute()
+    }
+
     private func resetCueState() {
         cleanCueIndex = 0
         feedbackMessage = nil
@@ -183,5 +200,5 @@ struct CleanGuidanceView: View {
 }
 
 #Preview {
-    CleanGuidanceView(viewModel: WalkthroughViewModel()) {}
+    CleanGuidanceView(viewModel: WalkthroughViewModel(), onArrival: {}, onEndRoute: {})
 }

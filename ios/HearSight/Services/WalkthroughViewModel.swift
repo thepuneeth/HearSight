@@ -36,17 +36,23 @@ enum HapticGuidancePulse {
     case warning
 }
 
-final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerDelegate, AVSpeechSynthesizerDelegate {
+final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerDelegate, AVSpeechSynthesizerDelegate, AVAudioPlayerDelegate {
     @Published var serverBaseURL = "http://127.0.0.1:8787"
     @Published var destinationQuery = ""
     @Published var resolvedDestinationName: String?
     @Published var walkthrough: WalkthroughResponse?
     @Published var backendHealth: BackendHealth?
     @Published var currentLocation: CLLocation?
+    @Published var currentLocationName: String?
+    @Published var manualCurrentLocationQuery = ""
+    @Published var isUsingManualCurrentLocation = false
     @Published var authorizationStatus: CLAuthorizationStatus = .notDetermined
     @Published var statusMessage = "Enter a destination to prepare a route."
     @Published var errorMessage: String?
     @Published var isGenerating = false
+    @Published var routeGenerationProgress = 0.0
+    @Published var routeGenerationTitle = "Preparing walking route"
+    @Published var routeGenerationDetail = "Using your current location."
     @Published var isGuiding = false
     @Published var isCheckingBackend = false
     @Published var nextStageIndex = 0
@@ -54,6 +60,7 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
     @Published var pausedForOffRoute = false
     @Published var flowState: RouteFlowState = .destinationEntry
     @Published var isListeningForDestination = false
+    @Published var isListeningForCurrentLocation = false
     @Published var speechRecognitionStatus = "Double tap the screen to activate the microphone."
     @Published var voiceInputState: VoiceInputState = .idle
     @Published var isFirstVisit = true
@@ -70,13 +77,19 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
     @Published var isRefreshingPreview = false
 
     private let locationManager = CLLocationManager()
+    private let geocoder = CLGeocoder()
     private let synthesizer = AVSpeechSynthesizer()
+    private var ttsAudioPlayer: AVAudioPlayer?
+    private var ttsPlaybackTask: Task<Void, Never>?
+    private var ttsAudioCache: [String: Data] = [:]
+    private var hasUsedRemoteTts = false
     private let audioEngine = AVAudioEngine()
     private let speechRecognizer = SFSpeechRecognizer(locale: Locale.current)
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
     private var recognitionTask: SFSpeechRecognitionTask?
     private var isAudioTapInstalled = false
     private var recognizedDestinationText: String?
+    private var recognizedCurrentLocationText: String?
     private var routeCoordinates: [CLLocationCoordinate2D] = []
     private var poorAccuracyWarningDate: Date?
     private var offRouteObservationCount = 0
@@ -86,6 +99,9 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
     private var previewStillWorkingSpeechTask: Task<Void, Never>?
     private var activePreviewKey: String?
     private var isWaitingForLocationToGenerate = false
+    private var isResolvingCurrentLocationName = false
+    private var isResolvingManualCurrentLocation = false
+    private var lastGeocodedLocation: CLLocation?
     private var hasSpokenHomeIntro = false
     private var lastSpokenDestinationEntry: String?
     private var lastSpokenPreviewReadyID: String?
@@ -95,7 +111,10 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
     private let triggerRadiusMeters: CLLocationDistance = 22
     private let acceptableAccuracyMeters: CLLocationAccuracy = 35
     private let offRouteRadiusMeters: CLLocationDistance = 90
+    private let routeOriginMaxAge: TimeInterval = 45
+    private let routeOriginAcceptableAccuracyMeters: CLLocationAccuracy = 120
     private let fallbackPreviewDelayNanos: UInt64 = 7_000_000_000
+    private let maxTtsCacheEntries = 40
 
     override init() {
         super.init()
@@ -134,7 +153,133 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
         if !backendHealth.missingConfig.isEmpty {
             return "Backend needs \(backendHealth.missingConfig.joined(separator: ", "))"
         }
-        return backendHealth.mockMode ? "Backend mock mode" : "Backend ready"
+        return "Backend ready"
+    }
+
+    var currentLocationTitle: String {
+        if isUsingManualCurrentLocation {
+            return currentLocationName ?? "Manual current location"
+        }
+
+        switch authorizationStatus {
+        case .denied, .restricted:
+            return "Location access is off"
+        case .notDetermined:
+            return "Waiting for location permission"
+        case .authorizedAlways, .authorizedWhenInUse:
+            guard currentLocation != nil else { return "Finding current location" }
+            return currentLocationName ?? "Current location found"
+        @unknown default:
+            return "Finding current location"
+        }
+    }
+
+    var currentLocationDetail: String {
+        if isUsingManualCurrentLocation, let location = currentLocation {
+            let accuracyText = location.horizontalAccuracy >= 0
+                ? "Accuracy about \(Int(location.horizontalAccuracy.rounded())) meters."
+                : "Accuracy unavailable."
+            return "\(coordinateSummary(for: location)) \(accuracyText)"
+        }
+
+        switch authorizationStatus {
+        case .denied, .restricted:
+            return "Enable Location Services for HearSight to build walking routes."
+        case .notDetermined:
+            return "Allow location access when prompted."
+        case .authorizedAlways, .authorizedWhenInUse:
+            guard let location = currentLocation else {
+                return "Waiting for GPS."
+            }
+
+            let accuracyText = location.horizontalAccuracy >= 0
+                ? "Accuracy about \(Int(location.horizontalAccuracy.rounded())) meters."
+                : "Accuracy unavailable."
+            return "\(coordinateSummary(for: location)) \(accuracyText)"
+        @unknown default:
+            return "Waiting for GPS."
+        }
+    }
+
+    var currentLocationSystemImage: String {
+        if isUsingManualCurrentLocation {
+            return "mappin.and.ellipse"
+        }
+
+        switch authorizationStatus {
+        case .denied, .restricted:
+            return "location.slash.fill"
+        case .authorizedAlways, .authorizedWhenInUse:
+            return currentLocation == nil ? "location.magnifyingglass" : "location.fill"
+        default:
+            return "location"
+        }
+    }
+
+    func setManualCurrentLocation(latitude: Double, longitude: Double) {
+        let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+        guard CLLocationCoordinate2DIsValid(coordinate) else {
+            statusMessage = "Manual location is not valid."
+            performHaptic(.warning)
+            return
+        }
+
+        let location = CLLocation(
+            coordinate: coordinate,
+            altitude: 0,
+            horizontalAccuracy: 8,
+            verticalAccuracy: 8,
+            timestamp: Date()
+        )
+        isUsingManualCurrentLocation = true
+        currentLocation = location
+        currentLocationName = "Manual current location"
+        lastGeocodedLocation = nil
+        updateCurrentLocationName(for: location)
+        statusMessage = "Manual current location set."
+        performHaptic(.straight)
+    }
+
+    func setManualCurrentLocation(from query: String) {
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            statusMessage = "Type or speak a current location first."
+            performHaptic(.warning)
+            return
+        }
+
+        isResolvingManualCurrentLocation = true
+        manualCurrentLocationQuery = trimmed
+        statusMessage = "Finding current location."
+        geocoder.geocodeAddressString(trimmed) { [weak self] placemarks, error in
+            DispatchQueue.main.async {
+                guard let self else { return }
+                self.isResolvingManualCurrentLocation = false
+
+                guard error == nil,
+                      let location = placemarks?.first?.location else {
+                    self.statusMessage = "Could not find that current location."
+                    self.performHaptic(.warning)
+                    return
+                }
+
+                self.isUsingManualCurrentLocation = true
+                self.currentLocation = location
+                self.currentLocationName = trimmed
+                self.lastGeocodedLocation = location
+                self.statusMessage = "Manual current location set."
+                self.performHaptic(.straight)
+            }
+        }
+    }
+
+    func resumeLiveCurrentLocation() {
+        isUsingManualCurrentLocation = false
+        currentLocationName = nil
+        manualCurrentLocationQuery = ""
+        lastGeocodedLocation = nil
+        statusMessage = "Using live current location."
+        requestLocationAccess()
     }
 
     var currentStageTitle: String {
@@ -223,9 +368,19 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
     }
 
     func requestLocationAccess() {
-        locationManager.requestWhenInUseAuthorization()
-        locationManager.startUpdatingLocation()
-        locationManager.startUpdatingHeading()
+        authorizationStatus = locationManager.authorizationStatus
+
+        switch locationManager.authorizationStatus {
+        case .notDetermined:
+            locationManager.requestWhenInUseAuthorization()
+        case .authorizedAlways, .authorizedWhenInUse:
+            locationManager.startUpdatingLocation()
+            locationManager.startUpdatingHeading()
+        case .denied, .restricted:
+            statusMessage = "Location access is off. Enable Location Services for HearSight, then try again."
+        @unknown default:
+            locationManager.requestWhenInUseAuthorization()
+        }
     }
 
     func speakHomeIntroIfNeeded() {
@@ -265,6 +420,14 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
         }
     }
 
+    func toggleCurrentLocationVoiceInput() {
+        if isListeningForCurrentLocation {
+            stopCurrentLocationListening(confirm: true)
+        } else {
+            startCurrentLocationListening()
+        }
+    }
+
     func startDestinationListening() {
         guard !isListeningForDestination else {
             stopDestinationListening(confirm: true)
@@ -290,18 +453,33 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
         }
     }
 
+    func startCurrentLocationListening() {
+        guard !isListeningForCurrentLocation else {
+            stopCurrentLocationListening(confirm: true)
+            return
+        }
+
+        guard speechRecognizer?.isAvailable == true else {
+            showMicrophoneUnavailableMessage(context: "current location")
+            return
+        }
+
+        SFSpeechRecognizer.requestAuthorization { [weak self] authorizationStatus in
+            DispatchQueue.main.async {
+                guard let self else { return }
+                guard authorizationStatus == .authorized else {
+                    self.voiceInputState = .unavailable("Speech recognition unavailable. Type current location.")
+                    self.speechRecognitionStatus = "Speech recognition is not available. Type the current location instead."
+                    self.statusMessage = self.speechRecognitionStatus
+                    return
+                }
+                self.beginCurrentLocationRecognition()
+            }
+        }
+    }
+
     func stopDestinationListening(confirm: Bool = false) {
-        if audioEngine.isRunning {
-            audioEngine.stop()
-        }
-        if isAudioTapInstalled {
-            audioEngine.inputNode.removeTap(onBus: 0)
-            isAudioTapInstalled = false
-        }
-        recognitionRequest?.endAudio()
-        recognitionTask?.cancel()
-        recognitionRequest = nil
-        recognitionTask = nil
+        stopRecognitionSession()
         isListeningForDestination = false
 
         if confirm {
@@ -321,8 +499,43 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
         recognizedDestinationText = nil
     }
 
+    func stopCurrentLocationListening(confirm: Bool = false) {
+        stopRecognitionSession()
+        isListeningForCurrentLocation = false
+
+        if confirm {
+            let location = recognizedCurrentLocationText ?? ""
+            if location.isEmpty {
+                speechRecognitionStatus = "No current location heard. Try again or type it."
+                voiceInputState = .failure(speechRecognitionStatus)
+            } else {
+                manualCurrentLocationQuery = location
+                speechRecognitionStatus = "Current location captured."
+                voiceInputState = .success
+            }
+        } else if manualCurrentLocationQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            voiceInputState = .idle
+        }
+        recognizedCurrentLocationText = nil
+    }
+
+    private func stopRecognitionSession() {
+        if audioEngine.isRunning {
+            audioEngine.stop()
+        }
+        if isAudioTapInstalled {
+            audioEngine.inputNode.removeTap(onBus: 0)
+            isAudioTapInstalled = false
+        }
+        recognitionRequest?.endAudio()
+        recognitionTask?.cancel()
+        recognitionRequest = nil
+        recognitionTask = nil
+    }
+
     func generateWalkthrough(forceRefresh: Bool = false) {
         stopDestinationListening()
+        stopCurrentLocationListening()
 
         let query = destinationQuery.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !query.isEmpty else {
@@ -347,6 +560,9 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
         isWaitingForLocationToGenerate = false
         errorMessage = nil
         isGenerating = true
+        routeGenerationProgress = 0.12
+        routeGenerationTitle = "Preparing walking route"
+        routeGenerationDetail = "Using your current location."
         isPreviewLoading = true
         isRefreshingPreview = false
         flowState = .destinationEntry
@@ -369,10 +585,15 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
             statusMessage = "Preparing arrival preview."
         }
 
-        guard let origin = currentLocation?.coordinate else {
+        guard let origin = usableCurrentLocation?.coordinate else {
             isWaitingForLocationToGenerate = true
-            statusMessage = "Waiting for current location before resolving \(query)."
-            debugDestinationLog("Waiting for current location before requesting \(query).")
+            if currentLocation == nil {
+                statusMessage = "Waiting for current location before resolving \(query)."
+                debugDestinationLog("Waiting for current location before requesting \(query).")
+            } else {
+                statusMessage = "Waiting for a more accurate current location before resolving \(query)."
+                debugDestinationLog("Waiting for a fresher or more accurate location before requesting \(query).")
+            }
             scheduleLocationWaitTimeout(for: query, cacheKey: cacheKey)
             requestLocationAccess()
             return
@@ -388,9 +609,21 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
         previewTask = Task {
             do {
                 let client = WalkthroughAPIClient(serverBaseURL: baseURL)
+                await MainActor.run {
+                    self.routeGenerationProgress = 0.28
+                    self.routeGenerationTitle = "Connecting to route service"
+                    self.routeGenerationDetail = "Confirming the route engine is available."
+                }
+
                 let health = try await client.health()
                 if !health.missingConfig.isEmpty {
                     throw WalkthroughAPIError.serverError("Preview service is not fully configured.")
+                }
+
+                await MainActor.run {
+                    self.routeGenerationProgress = 0.52
+                    self.routeGenerationTitle = "Building walking route"
+                    self.routeGenerationDetail = "Finding a walking path and route checkpoints."
                 }
 
                 let response = try await client.createWalkthrough(
@@ -404,6 +637,9 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
                     self.fallbackPreviewTask?.cancel()
                     self.previewStillWorkingSpeechTask?.cancel()
                     Self.walkthroughCache[cacheKey] = response
+                    self.routeGenerationProgress = 1
+                    self.routeGenerationTitle = "Route preview ready"
+                    self.routeGenerationDetail = "Opening the cue preview."
                     self.backendHealth = health
                     self.resolvedDestinationName = response.destination?.name ?? response.destination?.formattedAddress ?? query
                     if !self.hasStartedGuidance && !self.hasArrived {
@@ -424,6 +660,9 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
                     self.previewStillWorkingSpeechTask?.cancel()
                     self.previewUnavailable = true
                     self.isGenerating = false
+                    self.routeGenerationProgress = 0
+                    self.routeGenerationTitle = "Preparing walking route"
+                    self.routeGenerationDetail = "Using your current location."
                     self.isPreviewLoading = false
                     self.isRefreshingPreview = false
                     self.statusMessage = self.friendlyGenerationMessage(for: error, destination: query)
@@ -525,8 +764,13 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
         }
     }
 
-    func resetRoute() {
+    func resetRoute(announcePause: Bool = true) {
         stopDestinationListening()
+        if announcePause {
+            stopSpeakingImmediately()
+        } else {
+            stopSpeechPlayback()
+        }
         previewTask?.cancel()
         fallbackPreviewTask?.cancel()
         locationWaitTask?.cancel()
@@ -543,12 +787,23 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
         hasArrived = false
         hasStartedGuidance = false
         isGenerating = false
+        routeGenerationProgress = 0
+        routeGenerationTitle = "Preparing walking route"
+        routeGenerationDetail = "Using your current location."
         isPreviewLoading = false
         isRefreshingPreview = false
         previewUnavailable = false
         isUsingBasicGuidanceFallback = false
         flowState = .destinationEntry
         statusMessage = "Enter a destination to prepare a route."
+    }
+
+    func endRoute() {
+        resetRoute(announcePause: false)
+        statusMessage = "Route ended."
+        speechRecognitionStatus = "Route ended. Speak or type a new destination."
+        speakAccessibilityPrompt("Route ended. Speak or type a new destination.", interrupt: true)
+        performHaptic(.warning)
     }
 
     func repeatCurrentStage() {
@@ -591,8 +846,7 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
     }
 
     func stopSpeakingImmediately() {
-        synthesizer.stopSpeaking(at: .immediate)
-        isSpeaking = false
+        stopSpeechPlayback()
         statusMessage = "Guidance paused."
         speakAccessibilityPrompt("Guidance paused.")
     }
@@ -619,15 +873,29 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
                 self.statusMessage = "Location is active."
                 manager.startUpdatingLocation()
                 manager.startUpdatingHeading()
+            } else if manager.authorizationStatus == .denied || manager.authorizationStatus == .restricted {
+                self.isWaitingForLocationToGenerate = false
+                self.locationWaitTask?.cancel()
+                self.isGenerating = false
+                self.isPreviewLoading = false
+                self.statusMessage = "Location access is off. Enable Location Services for HearSight, then try again."
             }
         }
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let location = locations.last else { return }
+        guard !isUsingManualCurrentLocation else { return }
+        guard let location = locations.reversed().first(where: isFreshLocation) ?? locations.last else { return }
         DispatchQueue.main.async {
             self.currentLocation = location
+            self.updateCurrentLocationName(for: location)
             if self.isWaitingForLocationToGenerate {
+                guard self.isUsableRouteOrigin(location) else {
+                    self.statusMessage = "Waiting for a more accurate current location."
+                    self.debugDestinationLog("Received location, but accuracy or age is not route-ready.")
+                    return
+                }
+
                 self.isWaitingForLocationToGenerate = false
                 self.locationWaitTask?.cancel()
                 self.debugDestinationLog("Current location ready. Retrying destination request.")
@@ -653,6 +921,14 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
     }
 
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
+        isSpeaking = false
+    }
+
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        isSpeaking = false
+    }
+
+    func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
         isSpeaking = false
     }
 
@@ -768,7 +1044,7 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
                 guard let self,
                       self.activePreviewKey == cacheKey,
                       self.isWaitingForLocationToGenerate,
-                      self.currentLocation == nil else {
+                      self.usableCurrentLocation == nil else {
                     return
                 }
 
@@ -777,10 +1053,71 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
                 self.isPreviewLoading = false
                 self.isRefreshingPreview = false
                 self.previewUnavailable = true
-                self.statusMessage = "Current location is not available. Turn on Location Services or set a simulator location, then try \(destination) again."
+                self.statusMessage = "Current location is not ready. Turn on Location Services or set a manual current location, then try \(destination) again."
                 self.debugDestinationLog("Location wait timed out for \(destination).")
             }
         }
+    }
+
+    private var usableCurrentLocation: CLLocation? {
+        guard let currentLocation, isUsableRouteOrigin(currentLocation) else { return nil }
+        return currentLocation
+    }
+
+    private func updateCurrentLocationName(for location: CLLocation) {
+        guard location.horizontalAccuracy >= 0 else { return }
+        if let lastGeocodedLocation,
+           lastGeocodedLocation.distance(from: location) < 50,
+           currentLocationName != nil {
+            return
+        }
+        guard !isResolvingCurrentLocationName else { return }
+
+        isResolvingCurrentLocationName = true
+        lastGeocodedLocation = location
+        geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, _ in
+            DispatchQueue.main.async {
+                guard let self else { return }
+                self.isResolvingCurrentLocationName = false
+                guard self.currentLocation?.distance(from: location) ?? .greatestFiniteMagnitude < 100 else { return }
+                self.currentLocationName = placemarks?.compactMap(self.locationName(from:)).first
+            }
+        }
+    }
+
+    private func locationName(from placemark: CLPlacemark) -> String? {
+        let street = [placemark.subThoroughfare, placemark.thoroughfare]
+            .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+            .joined(separator: " ")
+        if !street.isEmpty {
+            return street
+        }
+
+        var seenAreas = Set<String>()
+        let area = [placemark.name, placemark.locality, placemark.administrativeArea]
+            .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+            .filter { seenAreas.insert($0).inserted }
+            .prefix(2)
+            .joined(separator: ", ")
+        return area.isEmpty ? nil : area
+    }
+
+    private func coordinateSummary(for location: CLLocation) -> String {
+        let latitude = String(format: "%.5f", location.coordinate.latitude)
+        let longitude = String(format: "%.5f", location.coordinate.longitude)
+        return "Lat \(latitude), Long \(longitude)."
+    }
+
+    private func isFreshLocation(_ location: CLLocation) -> Bool {
+        abs(location.timestamp.timeIntervalSinceNow) <= routeOriginMaxAge
+    }
+
+    private func isUsableRouteOrigin(_ location: CLLocation) -> Bool {
+        isFreshLocation(location)
+            && location.horizontalAccuracy >= 0
+            && location.horizontalAccuracy <= routeOriginAcceptableAccuracyMeters
     }
 
     private func speakPoorAccuracyWarningIfNeeded(_ accuracy: CLLocationAccuracy) {
@@ -805,24 +1142,115 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
 
-        if immediate {
-            synthesizer.stopSpeaking(at: .immediate)
+        stopSpeechPlayback()
+
+        let language = Locale.current.identifier
+        let cacheKey = ttsCacheKey(text: trimmed, language: language)
+        isSpeaking = true
+
+        ttsPlaybackTask = Task { [weak self] in
+            guard let self else { return }
+
+            do {
+                let audioData = try await self.ttsAudioData(text: trimmed, language: language, cacheKey: cacheKey)
+                await MainActor.run {
+                    guard !Task.isCancelled else { return }
+                    self.playTtsAudio(audioData, fallbackText: trimmed)
+                }
+            } catch {
+                await MainActor.run {
+                    guard !Task.isCancelled else { return }
+                    if self.hasUsedRemoteTts {
+                        self.isSpeaking = false
+                        self.debugDestinationLog("Google TTS failed after remote voice was active; skipping Apple fallback to keep voice consistent.")
+                    } else {
+                        self.speakWithApple(text: trimmed)
+                    }
+                }
+            }
+        }
+    }
+
+    private func ttsAudioData(text: String, language: String, cacheKey: String) async throws -> Data {
+        if let cached = await MainActor.run(body: { ttsAudioCache[cacheKey] }) {
+            return cached
         }
 
-        let utterance = AVSpeechUtterance(string: trimmed)
+        let audioData = try await WalkthroughAPIClient(serverBaseURL: serverBaseURL)
+            .synthesizeSpeech(text: text, language: language)
+
+        await MainActor.run {
+            if self.ttsAudioCache.count >= self.maxTtsCacheEntries {
+                self.ttsAudioCache.removeAll(keepingCapacity: true)
+            }
+            self.ttsAudioCache[cacheKey] = audioData
+        }
+
+        return audioData
+    }
+
+    private func playTtsAudio(_ audioData: Data, fallbackText: String) {
+        do {
+            stopActiveSpeech(cancelPendingTts: false)
+            let player = try AVAudioPlayer(data: audioData)
+            player.delegate = self
+            player.prepareToPlay()
+            ttsAudioPlayer = player
+            hasUsedRemoteTts = true
+            isSpeaking = true
+            if !player.play() {
+                handleRemoteTtsPlaybackFailure(fallbackText: fallbackText)
+            }
+        } catch {
+            handleRemoteTtsPlaybackFailure(fallbackText: fallbackText)
+        }
+    }
+
+    private func speakWithApple(text: String) {
+        stopActiveSpeech(cancelPendingTts: false)
+        let utterance = AVSpeechUtterance(string: text)
         utterance.voice = AVSpeechSynthesisVoice(language: Locale.current.identifier)
         utterance.rate = AVSpeechUtteranceDefaultSpeechRate * 0.92
         isSpeaking = true
         synthesizer.speak(utterance)
     }
 
+    private func handleRemoteTtsPlaybackFailure(fallbackText: String) {
+        if hasUsedRemoteTts {
+            isSpeaking = false
+            debugDestinationLog("Google TTS audio could not be played; skipping Apple fallback to keep voice consistent.")
+        } else {
+            speakWithApple(text: fallbackText)
+        }
+    }
+
+    private func stopSpeechPlayback() {
+        stopActiveSpeech(cancelPendingTts: true)
+    }
+
+    private func stopActiveSpeech(cancelPendingTts: Bool) {
+        if cancelPendingTts {
+            ttsPlaybackTask?.cancel()
+            ttsPlaybackTask = nil
+        }
+        ttsAudioPlayer?.stop()
+        ttsAudioPlayer = nil
+        synthesizer.stopSpeaking(at: .immediate)
+        isSpeaking = false
+    }
+
+    private func ttsCacheKey(text: String, language: String) -> String {
+        "\(language)|\(text)"
+    }
+
     private func beginDestinationRecognition() {
         stopDestinationListening()
+        stopCurrentLocationListening()
 
         do {
             try configureAudioSessionForSpeech()
         } catch {
-            showMicrophoneUnavailableMessage()
+            showMicrophoneUnavailableMessage(context: "destination")
             return
         }
 
@@ -834,13 +1262,11 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
         let inputNode = audioEngine.inputNode
         let recordingFormat = inputNode.outputFormat(forBus: 0)
         guard isValidInputFormat(recordingFormat) else {
-            showMicrophoneUnavailableMessage()
+            showMicrophoneUnavailableMessage(context: "destination")
             return
         }
 
-        if synthesizer.isSpeaking {
-            synthesizer.stopSpeaking(at: .immediate)
-        }
+        stopSpeechPlayback()
 
         inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { buffer, _ in
             recognitionRequest.append(buffer)
@@ -865,7 +1291,7 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
 
                 if error != nil {
                     self.stopDestinationListening()
-                    self.showMicrophoneUnavailableMessage()
+                    self.showMicrophoneUnavailableMessage(context: "destination")
                 }
             }
         }
@@ -879,7 +1305,73 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
             statusMessage = "Listening for your destination."
             speakAccessibilityPrompt("Listening. Say your destination now.", interrupt: true)
         } catch {
-            showMicrophoneUnavailableMessage()
+            showMicrophoneUnavailableMessage(context: "destination")
+        }
+    }
+
+    private func beginCurrentLocationRecognition() {
+        stopDestinationListening()
+        stopCurrentLocationListening()
+
+        do {
+            try configureAudioSessionForSpeech()
+        } catch {
+            showMicrophoneUnavailableMessage(context: "current location")
+            return
+        }
+
+        recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
+        guard let recognitionRequest else { return }
+        recognitionRequest.shouldReportPartialResults = true
+        recognizedCurrentLocationText = nil
+
+        let inputNode = audioEngine.inputNode
+        let recordingFormat = inputNode.outputFormat(forBus: 0)
+        guard isValidInputFormat(recordingFormat) else {
+            showMicrophoneUnavailableMessage(context: "current location")
+            return
+        }
+
+        stopSpeechPlayback()
+
+        inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { buffer, _ in
+            recognitionRequest.append(buffer)
+        }
+        isAudioTapInstalled = true
+
+        recognitionTask = speechRecognizer?.recognitionTask(with: recognitionRequest) { [weak self] result, error in
+            DispatchQueue.main.async {
+                guard let self else { return }
+                if let result {
+                    if let cleanedText = self.cleanRecognizedCurrentLocation(result.bestTranscription.formattedString) {
+                        self.recognizedCurrentLocationText = cleanedText
+                        self.manualCurrentLocationQuery = cleanedText
+                    }
+                    self.speechRecognitionStatus = result.isFinal ? "Current location captured." : "Listening..."
+                    self.voiceInputState = result.isFinal ? .success : .listening
+                    if result.isFinal {
+                        self.stopCurrentLocationListening(confirm: true)
+                    }
+                    return
+                }
+
+                if error != nil {
+                    self.stopCurrentLocationListening()
+                    self.showMicrophoneUnavailableMessage(context: "current location")
+                }
+            }
+        }
+
+        do {
+            audioEngine.prepare()
+            try audioEngine.start()
+            isListeningForCurrentLocation = true
+            speechRecognitionStatus = "Listening..."
+            voiceInputState = .listening
+            statusMessage = "Listening for your current location."
+            speakAccessibilityPrompt("Listening. Say your current location now.", interrupt: true)
+        } catch {
+            showMicrophoneUnavailableMessage(context: "current location")
         }
     }
 
@@ -893,11 +1385,13 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
         format.sampleRate > 0 && format.channelCount > 0
     }
 
-    private func showMicrophoneUnavailableMessage() {
+    private func showMicrophoneUnavailableMessage(context: String = "destination") {
         stopDestinationListening()
-        speechRecognitionStatus = "Microphone unavailable. Type destination."
-        statusMessage = "Microphone unavailable. Type destination."
-        voiceInputState = .unavailable("Microphone unavailable. Type destination.")
+        stopCurrentLocationListening()
+        let target = context == "current location" ? "current location" : "destination"
+        speechRecognitionStatus = "Microphone unavailable. Type \(target)."
+        statusMessage = "Microphone unavailable. Type \(target)."
+        voiceInputState = .unavailable("Microphone unavailable. Type \(target).")
     }
 
     private func cleanRecognizedDestination(_ text: String) -> String? {
@@ -907,6 +1401,24 @@ final class WalkthroughViewModel: NSObject, ObservableObject, CLLocationManagerD
             .replacingOccurrences(of: "listening for destination", with: "", options: [.caseInsensitive])
             .replacingOccurrences(of: "listening", with: "", options: [.caseInsensitive])
             .replacingOccurrences(of: "destination", with: "", options: [.caseInsensitive])
+            .replacingOccurrences(of: "now", with: "", options: [.caseInsensitive])
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        while cleaned.contains("  ") {
+            cleaned = cleaned.replacingOccurrences(of: "  ", with: " ")
+        }
+
+        let trimmed = cleaned.trimmingCharacters(in: CharacterSet(charactersIn: " .,!?\n\t"))
+        guard trimmed.count >= 3 else { return nil }
+        return trimmed
+    }
+
+    private func cleanRecognizedCurrentLocation(_ text: String) -> String? {
+        var cleaned = text
+            .replacingOccurrences(of: "say your current location now", with: "", options: [.caseInsensitive])
+            .replacingOccurrences(of: "current location", with: "", options: [.caseInsensitive])
+            .replacingOccurrences(of: "location", with: "", options: [.caseInsensitive])
+            .replacingOccurrences(of: "listening", with: "", options: [.caseInsensitive])
             .replacingOccurrences(of: "now", with: "", options: [.caseInsensitive])
             .trimmingCharacters(in: .whitespacesAndNewlines)
 

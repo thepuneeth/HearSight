@@ -80,6 +80,37 @@ struct WalkthroughAPIClient {
         throw WalkthroughAPIError.serverError("Backend request failed with status \(httpResponse.statusCode).")
     }
 
+    func synthesizeSpeech(text: String, language: String) async throws -> Data {
+        guard let baseURL = URL(string: normalizedServerBaseURL) else {
+            throw WalkthroughAPIError.invalidServerURL
+        }
+
+        let endpoint = baseURL.appending(path: "api/tts")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.timeoutInterval = 20
+        request.httpBody = try JSONEncoder().encode(TtsRequest(
+            text: text,
+            language: language
+        ))
+
+        let (data, response) = try await urlSession.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw WalkthroughAPIError.invalidResponse
+        }
+
+        if (200..<300).contains(httpResponse.statusCode) {
+            return data
+        }
+
+        if let errorPayload = try? JSONDecoder().decode(ServerErrorPayload.self, from: data) {
+            throw WalkthroughAPIError.serverError(errorPayload.error)
+        }
+
+        throw WalkthroughAPIError.serverError("Text-to-speech request failed with status \(httpResponse.statusCode).")
+    }
+
     private var normalizedServerBaseURL: String {
         serverBaseURL
             .trimmingCharacters(in: .whitespacesAndNewlines)
@@ -89,4 +120,9 @@ struct WalkthroughAPIClient {
 
 private struct ServerErrorPayload: Codable {
     let error: String
+}
+
+private struct TtsRequest: Codable {
+    let text: String
+    let language: String
 }

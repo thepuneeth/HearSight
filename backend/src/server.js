@@ -1,4 +1,5 @@
 import { createGoogleMapsClient } from "./googleMapsClient.js";
+import { createGoogleTtsClient } from "./googleTtsClient.js";
 import { createMistralDescriber } from "./mistralDescriber.js";
 import { requireRealApiConfig } from "./config.js";
 import { createWalkthrough, ValidationError } from "./walkthroughService.js";
@@ -16,6 +17,12 @@ export function createAppServer({ config, fetchImpl = fetch }) {
     model: config.mistralModel,
     fetchImpl
   });
+  const ttsClient = createGoogleTtsClient({
+    apiKey: config.googleTtsApiKey,
+    voice: config.googleTtsVoice,
+    audioEncoding: config.googleTtsAudioEncoding,
+    fetchImpl
+  });
 
   return async function handleRequest(request, response) {
     try {
@@ -24,7 +31,8 @@ export function createAppServer({ config, fetchImpl = fetch }) {
         response,
         config,
         googleMapsClient,
-        describer
+        describer,
+        ttsClient
       });
     } catch (error) {
       sendError(response, error);
@@ -32,7 +40,7 @@ export function createAppServer({ config, fetchImpl = fetch }) {
   };
 }
 
-async function routeRequest({ request, response, config, googleMapsClient, describer }) {
+async function routeRequest({ request, response, config, googleMapsClient, describer, ttsClient }) {
   const url = new URL(request.url, `http://${request.headers.host || "localhost"}`);
 
   if (request.method === "OPTIONS") {
@@ -72,12 +80,36 @@ async function routeRequest({ request, response, config, googleMapsClient, descr
     return;
   }
 
+  if (request.method === "POST" && url.pathname === "/api/tts") {
+    await synthesizeTts({ request, response, config, ttsClient });
+    return;
+  }
+
   if (request.method === "GET" && url.pathname === "/api/streetview") {
     await proxyStreetView({ url, response, config, googleMapsClient });
     return;
   }
 
   sendJson(response, 404, { error: "Not found." });
+}
+
+async function synthesizeTts({ request, response, config, ttsClient }) {
+  if (config.useMocks || !config.googleTtsApiKey) {
+    sendJson(response, 503, { error: "Google Text-to-Speech requires GOOGLE_TTS_API_KEY or GOOGLE_MAPS_API_KEY and real mode." });
+    return;
+  }
+
+  const body = await readJsonBody(request);
+  const audio = await ttsClient.synthesizeSpeech({
+    text: body.text,
+    language: body.language || "en-US"
+  });
+  writeCorsHeaders(response);
+  response.writeHead(200, {
+    "Content-Type": audio.contentType,
+    "Cache-Control": "private, max-age=86400"
+  });
+  response.end(audio.bytes);
 }
 
 async function proxyStreetView({ url, response, config, googleMapsClient }) {

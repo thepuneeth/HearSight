@@ -16,8 +16,8 @@ export function createMockWalkthrough({ origin, destination, language = "en-US" 
       safetyNotice: safetyNoticeText()
     },
     stages: [
-      mockStage(0, origin, 45, "Start walking toward the destination.", "At the start, expect to orient yourself before moving. Street View may be unavailable in mock mode."),
-      mockStage(1, midpoint, 90, "Continue straight.", "About halfway, expect a simple continuation point. This mock cue is for simulator testing only."),
+      mockStage(0, origin, 45, "Start walking toward the destination.", "At the start, expect to orient yourself before moving. Street View may be unavailable."),
+      mockStage(1, midpoint, 90, "Continue straight.", "About halfway, expect a simple continuation point."),
       mockStage(2, destination, 0, "Arrive near the destination.", "You are near the destination. Confirm the entrance and surroundings using live cues.")
     ]
   };
@@ -44,7 +44,7 @@ function mockStage(index, coordinate, headingDegrees, instruction, cue) {
       spokenCue: cue,
       landmarks: [],
       crossingOrIntersectionNotes: [],
-      uncertainties: ["Mock mode does not use live Google or AI services."],
+      uncertainties: ["Live route details may be limited."],
       confidence: 0
     }
   };

@@ -32,7 +32,11 @@ struct ContentView: View {
             case .preview:
                 CleanPreviewView(viewModel: viewModel, onBeginGuidance: beginCleanGuidance)
             case .guidance:
-                CleanGuidanceView(viewModel: viewModel, onArrival: showCleanArrival)
+                CleanGuidanceView(
+                    viewModel: viewModel,
+                    onArrival: showCleanArrival,
+                    onEndRoute: endCleanRoute
+                )
             case .arrival:
                 CleanArrivalView(viewModel: viewModel, onSave: saveCleanArrival, onDone: finishCleanFlow)
             }
@@ -115,6 +119,12 @@ struct ContentView: View {
         )
         withAnimation {
             cleanRoute = .arrival
+        }
+    }
+
+    private func endCleanRoute() {
+        withAnimation {
+            cleanRoute = .home
         }
     }
 
@@ -247,9 +257,17 @@ struct ContentView: View {
             )
             .shadow(color: Color(hex: 0x904D00).opacity(0.08), radius: 32, x: 0, y: 16)
 
+            if viewModel.isGenerating {
+                RouteGenerationProgressPanel(
+                    title: viewModel.routeGenerationTitle,
+                    detail: viewModel.routeGenerationDetail,
+                    progress: viewModel.routeGenerationProgress
+                )
+            }
+
             HearSightPrimaryButton(
-                title: viewModel.isGenerating ? "Getting Route" : "Confirm Destination",
-                systemImage: "checkmark",
+                title: viewModel.isGenerating ? "Building Route" : "Confirm Destination",
+                systemImage: viewModel.isGenerating ? "figure.walk" : "checkmark",
                 accessibilityHint: "Creates a route preview for this destination."
             ) {
                 isDestinationFocused = false
@@ -421,9 +439,17 @@ struct ContentView: View {
 
             Spacer(minLength: 10)
 
+            if viewModel.isGenerating {
+                RouteGenerationProgressPanel(
+                    title: viewModel.routeGenerationTitle,
+                    detail: viewModel.routeGenerationDetail,
+                    progress: viewModel.routeGenerationProgress
+                )
+            }
+
             HearSightPrimaryButton(
-                title: viewModel.isGenerating ? "Getting Route" : "Confirm",
-                systemImage: "checkmark",
+                title: viewModel.isGenerating ? "Building Route" : "Confirm",
+                systemImage: viewModel.isGenerating ? "figure.walk" : "checkmark",
                 accessibilityHint: "Creates a route preview for this destination."
             ) {
                 isDestinationFocused = false
@@ -460,6 +486,14 @@ struct ContentView: View {
                     accessibilityHint: "Prepares active guidance."
                 ) {
                     viewModel.markReadyToStart()
+                }
+
+                QuietButton(
+                    title: "End Route",
+                    systemImage: "xmark.circle.fill",
+                    accessibilityHint: "Closes this route preview and returns to destination entry."
+                ) {
+                    viewModel.endRoute()
                 }
             }
         }
@@ -515,7 +549,15 @@ struct ContentView: View {
                 }
             }
 
-            if viewModel.flowState != .activeGuidance {
+            if viewModel.flowState == .activeGuidance || viewModel.flowState == .paused || viewModel.flowState == .readyToStart {
+                QuietButton(
+                    title: "End Route",
+                    systemImage: "xmark.circle.fill",
+                    accessibilityHint: "Stops guidance and returns to destination entry."
+                ) {
+                    viewModel.endRoute()
+                }
+            } else if viewModel.flowState != .activeGuidance {
                 QuietButton(
                     title: "New Destination",
                     systemImage: "plus",
@@ -575,6 +617,63 @@ struct ContentView: View {
         default:
             return "Starts guidance."
         }
+    }
+}
+
+private struct RouteGenerationProgressPanel: View {
+    @Environment(\.colorScheme) private var colorScheme
+    let title: String
+    let detail: String
+    let progress: Double
+
+    var body: some View {
+        let theme = HearSightTheme.current(for: colorScheme)
+        let clampedProgress = min(max(progress, 0), 1)
+
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 12) {
+                ProgressView()
+                    .controlSize(.regular)
+                    .tint(Color(hex: 0x904D00))
+                    .accessibilityHidden(true)
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(title)
+                        .font(.headline.weight(.bold))
+                        .foregroundStyle(theme.primaryText)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.82)
+
+                    Text(detail)
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(theme.secondaryText)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.82)
+                }
+
+                Spacer(minLength: 8)
+
+                Text("\(Int((clampedProgress * 100).rounded()))%")
+                    .font(.subheadline.monospacedDigit().weight(.bold))
+                    .foregroundStyle(Color(hex: 0x904D00))
+                    .accessibilityHidden(true)
+            }
+
+            ProgressView(value: clampedProgress)
+                .tint(Color(hex: 0xFF8C00))
+                .accessibilityLabel("Route generation progress")
+                .accessibilityValue("\(Int((clampedProgress * 100).rounded())) percent")
+        }
+        .padding(16)
+        .background(Color.white.opacity(0.76))
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .stroke(Color(hex: 0xDDC1AE).opacity(0.34), lineWidth: 1)
+        )
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title). \(detail)")
+        .accessibilityValue("\(Int((clampedProgress * 100).rounded())) percent complete")
     }
 }
 
