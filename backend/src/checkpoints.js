@@ -9,11 +9,14 @@ import {
 export function buildRouteStages({
   route,
   publicBaseUrl,
-  maxStages = 30,
-  checkpointSpacingMeters = 50
+  maxStages = 8,
+  checkpointSpacingMeters = 120
 }) {
   const candidates = collectCandidates(route, checkpointSpacingMeters);
-  const reduced = enforceStageLimit(dedupeCandidates(candidates), maxStages);
+  const reduced = enforceStageLimit(
+    preferFinalApproach(compactCandidates(dedupeCandidates(candidates)), maxStages),
+    maxStages
+  );
 
   return reduced.map((candidate, index) => {
     const next = reduced[index + 1]?.coordinate || candidate.nextCoordinate || candidate.coordinate;
@@ -116,6 +119,89 @@ function dedupeCandidates(candidates) {
   return deduped;
 }
 
+function compactCandidates(candidates) {
+  const compacted = [];
+  const minDistanceMeters = 36;
+
+  for (const candidate of candidates.sort(compareCandidates)) {
+    const previous = compacted.at(-1);
+
+    if (candidate.kind === "destination") {
+      if (previous?.kind === "checkpoint" &&
+          Math.abs(candidate.routeDistanceMeters - previous.routeDistanceMeters) < minDistanceMeters) {
+        compacted.pop();
+      }
+      compacted.push(candidate);
+      continue;
+    }
+
+    if (previous && candidate.kind === "checkpoint") {
+      const distanceDelta = Math.abs(candidate.routeDistanceMeters - previous.routeDistanceMeters);
+      const sameInstruction = normalizeInstruction(candidate.instruction) === normalizeInstruction(previous.instruction);
+      if (distanceDelta < minDistanceMeters || sameInstruction && distanceDelta < 95) {
+        continue;
+      }
+    }
+
+    compacted.push(candidate);
+  }
+
+  return compacted.sort(compareCandidates);
+}
+
+function preferFinalApproach(candidates, maxStages) {
+  if (candidates.length <= maxStages) return candidates;
+
+  const destination = candidates.find((candidate) => candidate.kind === "destination") || candidates.at(-1);
+  const start = candidates[0];
+  const routeDistance = destination?.routeDistanceMeters || Math.max(...candidates.map((candidate) => candidate.routeDistanceMeters));
+
+  // Scale final approach with route length: 15% of route, min 350m, max 1500m
+  const finalApproachLength = Math.min(Math.max(routeDistance * 0.15, 350), 1500);
+  const finalApproachStart = Math.max(0, routeDistance - finalApproachLength);
+
+  // Always keep: start, destination, and every turn in the final approach
+  const required = [start]
+    .concat(candidates.filter((candidate) => candidate.kind === "maneuver" && candidate.routeDistanceMeters >= finalApproachStart))
+    .concat(destination ? [destination] : [])
+    .filter(Boolean);
+
+  const requiredKeys = new Set(required.map(candidateKey));
+
+  // Early zone: prefer maneuvers; fall back to checkpoints if none exist
+  const earlyManeuvers = candidates.filter((candidate) =>
+    candidate.kind === "maneuver" &&
+    candidate.routeDistanceMeters < finalApproachStart &&
+    !requiredKeys.has(candidateKey(candidate))
+  );
+  const earlyCheckpoints = candidates.filter((candidate) =>
+    candidate.kind === "checkpoint" &&
+    candidate.routeDistanceMeters < finalApproachStart &&
+    !requiredKeys.has(candidateKey(candidate))
+  );
+  const earlySlotCandidates = earlyManeuvers.length > 0 ? earlyManeuvers : earlyCheckpoints;
+
+  const finalApproachCheckpoints = candidates.filter((candidate) =>
+    candidate.kind === "checkpoint" &&
+    candidate.routeDistanceMeters >= finalApproachStart &&
+    !requiredKeys.has(candidateKey(candidate))
+  );
+
+  const remainingBudget = Math.max(0, maxStages - required.length);
+  const finalDetailBudget = Math.min(2, Math.floor(remainingBudget / 3));
+  const routeManeuverBudget = remainingBudget - finalDetailBudget;
+
+  const earlyPicked = evenlyPick(earlySlotCandidates, routeManeuverBudget);
+  const spillover = routeManeuverBudget - earlyPicked.length;
+  const finalPicked = evenlyPick(finalApproachCheckpoints, finalDetailBudget + spillover);
+
+  return uniqueCandidates([
+    ...required,
+    ...earlyPicked,
+    ...finalPicked
+  ]).sort(compareCandidates);
+}
+
 function enforceStageLimit(candidates, maxStages) {
   if (candidates.length <= maxStages) return candidates;
 
@@ -133,6 +219,31 @@ function enforceStageLimit(candidates, maxStages) {
   ].sort(compareCandidates).slice(0, maxStages);
 }
 
+function uniqueCandidates(candidates) {
+  const seen = new Set();
+  const unique = [];
+
+  for (const candidate of candidates) {
+    const key = candidateKey(candidate);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    unique.push(candidate);
+  }
+
+  return unique;
+}
+
+function candidateKey(candidate) {
+  return `${candidate.kind}:${coordinateKey(candidate.coordinate)}:${normalizeInstruction(candidate.instruction)}`;
+}
+
+function normalizeInstruction(instruction) {
+  return String(instruction || "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function evenlyPick(items, count) {
   if (items.length <= count) return items;
   if (count <= 0) return [];
@@ -148,17 +259,48 @@ function evenlyPick(items, count) {
 
 function nearestRouteDistance(point, overview, overviewDistances) {
   if (!overview.length) return 0;
+  if (overview.length === 1) return 0;
 
-  let bestIndex = 0;
   let bestDistance = Infinity;
-  for (let index = 0; index < overview.length; index += 1) {
-    const distance = haversineDistanceMeters(point, overview[index]);
+  let bestRouteDistance = 0;
+
+  for (let index = 1; index < overview.length; index += 1) {
+    const start = overview[index - 1];
+    const end = overview[index];
+    const segmentDistance = overviewDistances[index] - overviewDistances[index - 1] ||
+      haversineDistanceMeters(start, end);
+    const fraction = projectedFraction(point, start, end);
+    const projected = interpolateCoordinate(start, end, fraction);
+    const distance = haversineDistanceMeters(point, projected);
+
     if (distance < bestDistance) {
       bestDistance = distance;
-      bestIndex = index;
+      bestRouteDistance = (overviewDistances[index - 1] || 0) + segmentDistance * fraction;
     }
   }
-  return overviewDistances[bestIndex] || 0;
+
+  return bestRouteDistance;
+}
+
+function projectedFraction(point, start, end) {
+  const meanLatitude = toRadians((point.latitude + start.latitude + end.latitude) / 3);
+  const pointX = point.longitude * Math.cos(meanLatitude);
+  const pointY = point.latitude;
+  const startX = start.longitude * Math.cos(meanLatitude);
+  const startY = start.latitude;
+  const endX = end.longitude * Math.cos(meanLatitude);
+  const endY = end.latitude;
+  const deltaX = endX - startX;
+  const deltaY = endY - startY;
+  const lengthSquared = deltaX * deltaX + deltaY * deltaY;
+
+  if (!lengthSquared) return 0;
+
+  return Math.max(0, Math.min(1, ((pointX - startX) * deltaX + (pointY - startY) * deltaY) / lengthSquared));
+}
+
+function toRadians(degrees) {
+  return degrees * Math.PI / 180;
 }
 
 function makeStreetViewProxyUrl(publicBaseUrl, coordinate, headingDegrees) {

@@ -56,7 +56,7 @@ struct WalkthroughAPIClient {
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.timeoutInterval = 180
+        request.timeoutInterval = 90
         request.httpBody = try JSONEncoder().encode(WalkthroughRequest(
             origin: CoordinatePayload(origin),
             destination: nil,

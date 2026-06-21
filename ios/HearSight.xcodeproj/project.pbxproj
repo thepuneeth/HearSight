@@ -17,6 +17,13 @@
 		010000000000000000000109 /* Views/StageRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 010000000000000000000209 /* Views/StageRowView.swift */; };
 		010000000000000000000110 /* Resources/Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 010000000000000000000210 /* Resources/Assets.xcassets */; };
 		010000000000000000000111 /* Views/HearSightVisualSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 010000000000000000000211 /* Views/HearSightVisualSystem.swift */; };
+		010000000000000000000112 /* CleanHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 010000000000000000000212 /* CleanHomeView.swift */; };
+		010000000000000000000113 /* CleanPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 010000000000000000000213 /* CleanPreviewView.swift */; };
+		010000000000000000000114 /* CleanGuidanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 010000000000000000000214 /* CleanGuidanceView.swift */; };
+		010000000000000000000115 /* CleanArrivalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 010000000000000000000215 /* CleanArrivalView.swift */; };
+		010000000000000000000116 /* CleanComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 010000000000000000000216 /* CleanComponents.swift */; };
+		010000000000000000000117 /* CleanConfirmDestinationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 010000000000000000000217 /* CleanConfirmDestinationView.swift */; };
+		010000000000000000000118 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 010000000000000000000218 /* SettingsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +37,13 @@
 		010000000000000000000209 /* Views/StageRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/StageRowView.swift; sourceTree = "<group>"; };
 		010000000000000000000210 /* Resources/Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Resources/Assets.xcassets; sourceTree = "<group>"; };
 		010000000000000000000211 /* Views/HearSightVisualSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/HearSightVisualSystem.swift; sourceTree = "<group>"; };
+		010000000000000000000212 /* CleanHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleanHomeView.swift; sourceTree = "<group>"; };
+		010000000000000000000213 /* CleanPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleanPreviewView.swift; sourceTree = "<group>"; };
+		010000000000000000000214 /* CleanGuidanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleanGuidanceView.swift; sourceTree = "<group>"; };
+		010000000000000000000215 /* CleanArrivalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleanArrivalView.swift; sourceTree = "<group>"; };
+		010000000000000000000216 /* CleanComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleanComponents.swift; sourceTree = "<group>"; };
+		010000000000000000000217 /* CleanConfirmDestinationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CleanConfirmDestinationView.swift; sourceTree = "<group>"; };
+		010000000000000000000218 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		010000000000000000000301 /* HearSight.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HearSight.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -64,6 +78,7 @@
 				010000000000000000000208 /* Views/ContentView.swift */,
 				010000000000000000000209 /* Views/StageRowView.swift */,
 				010000000000000000000211 /* Views/HearSightVisualSystem.swift */,
+				010000000000000000000004 /* Views/CleanFlow */,
 				010000000000000000000210 /* Resources/Assets.xcassets */,
 			);
 			path = HearSight;
@@ -75,6 +90,20 @@
 				010000000000000000000301 /* HearSight.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		010000000000000000000004 /* Views/CleanFlow */ = {
+			isa = PBXGroup;
+			children = (
+				010000000000000000000216 /* CleanComponents.swift */,
+				010000000000000000000212 /* CleanHomeView.swift */,
+				010000000000000000000217 /* CleanConfirmDestinationView.swift */,
+				010000000000000000000213 /* CleanPreviewView.swift */,
+				010000000000000000000214 /* CleanGuidanceView.swift */,
+				010000000000000000000215 /* CleanArrivalView.swift */,
+				010000000000000000000218 /* SettingsView.swift */,
+			);
+			path = Views/CleanFlow;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -155,6 +184,13 @@
 				010000000000000000000108 /* Views/ContentView.swift in Sources */,
 				010000000000000000000109 /* Views/StageRowView.swift in Sources */,
 				010000000000000000000111 /* Views/HearSightVisualSystem.swift in Sources */,
+				010000000000000000000116 /* CleanComponents.swift in Sources */,
+				010000000000000000000112 /* CleanHomeView.swift in Sources */,
+				010000000000000000000117 /* CleanConfirmDestinationView.swift in Sources */,
+				010000000000000000000113 /* CleanPreviewView.swift in Sources */,
+				010000000000000000000114 /* CleanGuidanceView.swift in Sources */,
+				010000000000000000000115 /* CleanArrivalView.swift in Sources */,
+				010000000000000000000118 /* SettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -268,6 +304,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = KV5CHTA499;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSAppTransportSecurity_NSAllowsArbitraryLoads = YES;
@@ -284,7 +321,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 0.1;
-				PRODUCT_BUNDLE_IDENTIFIER = com.hearsight.prototype;
+				PRODUCT_BUNDLE_IDENTIFIER = com.hearsight2.prototype;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -298,6 +335,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = KV5CHTA499;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSAppTransportSecurity_NSAllowsArbitraryLoads = YES;
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "HearSight connects to your local prototype backend.";
@@ -313,7 +351,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 0.1;
-				PRODUCT_BUNDLE_IDENTIFIER = com.hearsight.prototype;
+				PRODUCT_BUNDLE_IDENTIFIER = com.hearsight2.prototype;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;

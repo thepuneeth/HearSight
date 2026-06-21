@@ -1,3 +1,4 @@
+import { haversineDistanceMeters } from "./geo.js";
 import { decodePolyline } from "./polyline.js";
 
 const ROUTES_ENDPOINT = "https://routes.googleapis.com/directions/v2:computeRoutes";
@@ -75,7 +76,7 @@ async function textSearchDestination({ destinationText, origin, language, apiKey
     body: JSON.stringify({
       textQuery: destinationText,
       languageCode: language,
-      maxResultCount: 1,
+      maxResultCount: 8,
       locationBias: origin ? {
         circle: {
           center: toGoogleLatLng(origin),
@@ -93,8 +94,9 @@ async function textSearchDestination({ destinationText, origin, language, apiKey
     });
   }
 
-  const place = payload.places?.[0];
+  const place = chooseBestDestinationPlace(payload.places || [], destinationText, origin);
   if (!place?.location) return null;
+  const matchScore = scorePlaceCandidate(place, destinationText, origin);
 
   return normalizeDestination({
     source: "places",
@@ -102,7 +104,7 @@ async function textSearchDestination({ destinationText, origin, language, apiKey
     name: place.displayName?.text || destinationText,
     formattedAddress: place.formattedAddress || null,
     coordinate: fromGoogleLatLng(place.location),
-    confidence: "high",
+    confidence: matchScore >= 24 ? "high" : "medium",
     types: place.types || []
   });
 }
@@ -139,6 +141,200 @@ async function geocodeDestination({ destinationText, language, apiKey, fetchImpl
     confidence: weak ? "low" : "medium",
     types: result.types || []
   });
+}
+
+function chooseBestDestinationPlace(places, destinationText, origin) {
+  const candidates = places.filter((place) => place?.location);
+  if (!candidates.length) return null;
+
+  return candidates
+    .map((place, index) => ({
+      place,
+      index,
+      score: scorePlaceCandidate(place, destinationText, origin)
+    }))
+    .sort((a, b) => {
+      const scoreDelta = b.score - a.score;
+      if (Math.abs(scoreDelta) > 0.001) return scoreDelta;
+      return a.index - b.index;
+    })[0].place;
+}
+
+function scorePlaceCandidate(place, destinationText, origin) {
+  const name = place.displayName?.text || "";
+  const address = place.formattedAddress || "";
+  const types = Array.isArray(place.types) ? place.types.join(" ") : "";
+  const nameText = normalizeSearchText(name);
+  const haystack = normalizeSearchText(`${name} ${address} ${types}`);
+  const queryTokens = meaningfulQueryTokens(destinationText);
+  let score = 0;
+
+  queryTokens.forEach((token, index) => {
+    if (matchesToken(haystack, token)) {
+      score += token.length <= 2 ? 10 : 12;
+      if (index === 0 && matchesToken(nameText, token)) {
+        score += 8;
+      }
+    }
+  });
+
+  for (const phrase of adjacentTokenPhrases(queryTokens)) {
+    if (matchesPhrase(haystack, phrase)) {
+      score += 18;
+    }
+  }
+
+  const queryText = normalizeSearchText(destinationText);
+  if (queryText && haystack.includes(queryText)) {
+    score += 30;
+  }
+
+  if (origin && place.location) {
+    const distanceMeters = haversineDistanceMeters(origin, fromGoogleLatLng(place.location));
+    score -= Math.min(16, distanceMeters / 10_000);
+  }
+
+  return score;
+}
+
+function meaningfulQueryTokens(text) {
+  const stopWords = new Set([
+    "a",
+    "an",
+    "and",
+    "at",
+    "by",
+    "for",
+    "go",
+    "going",
+    "in",
+    "near",
+    "of",
+    "on",
+    "the",
+    "to"
+  ]);
+
+  return normalizeSearchText(text)
+    .split(" ")
+    .map((token) => token.trim())
+    .filter((token) => token.length > 1 && !stopWords.has(token));
+}
+
+function adjacentTokenPhrases(tokens) {
+  const phrases = [];
+  for (let index = 0; index < tokens.length - 1; index += 1) {
+    const left = tokens[index];
+    const right = tokens[index + 1];
+    if (left.length <= 2 && right.length <= 2) continue;
+    phrases.push([left, right]);
+  }
+  return phrases;
+}
+
+function matchesToken(haystack, token) {
+  return tokenVariants(token).some((variant) =>
+    new RegExp(`(?:^|\\s)${escapeRegExp(variant)}(?:\\s|$)`, "i").test(haystack)
+  );
+}
+
+function matchesPhrase(haystack, phraseTokens) {
+  const variants = phraseTokens.map(tokenVariants);
+  for (const left of variants[0]) {
+    for (const right of variants[1]) {
+      const phrase = `${left} ${right}`;
+      if (haystack.includes(phrase)) return true;
+    }
+  }
+  return false;
+}
+
+function tokenVariants(token) {
+  const streetSuffixes = {
+    avenue: ["ave"],
+    ave: ["avenue"],
+    boulevard: ["blvd"],
+    blvd: ["boulevard"],
+    circle: ["cir"],
+    cir: ["circle"],
+    court: ["ct"],
+    ct: ["court"],
+    drive: ["dr"],
+    dr: ["drive"],
+    highway: ["hwy"],
+    hwy: ["highway"],
+    lane: ["ln"],
+    ln: ["lane"],
+    parkway: ["pkwy"],
+    pkwy: ["parkway"],
+    road: ["rd"],
+    rd: ["road"],
+    street: ["st"],
+    st: ["street"],
+    terrace: ["ter"],
+    ter: ["terrace"]
+  };
+  const states = {
+    alabama: ["al"],
+    al: ["alabama"],
+    alaska: ["ak"],
+    ak: ["alaska"],
+    arizona: ["az"],
+    az: ["arizona"],
+    arkansas: ["ar"],
+    ar: ["arkansas"],
+    california: ["ca"],
+    ca: ["california"],
+    colorado: ["co"],
+    co: ["colorado"],
+    connecticut: ["ct"],
+    delaware: ["de"],
+    de: ["delaware"],
+    florida: ["fl"],
+    fl: ["florida"],
+    georgia: ["ga"],
+    ga: ["georgia"],
+    illinois: ["il"],
+    il: ["illinois"],
+    indiana: ["in"],
+    kansas: ["ks"],
+    ks: ["kansas"],
+    kentucky: ["ky"],
+    ky: ["kentucky"],
+    mississippi: ["ms"],
+    ms: ["mississippi"],
+    missouri: ["mo"],
+    mo: ["missouri"],
+    north: ["n"],
+    n: ["north"],
+    south: ["s"],
+    s: ["south"],
+    tennessee: ["tn"],
+    tn: ["tennessee"],
+    texas: ["tx"],
+    tx: ["texas"],
+    virginia: ["va"],
+    va: ["virginia"]
+  };
+
+  return Array.from(new Set([
+    token,
+    ...(streetSuffixes[token] || []),
+    ...(states[token] || [])
+  ]));
+}
+
+function normalizeSearchText(text) {
+  return String(text || "")
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function escapeRegExp(text) {
+  return String(text).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 export async function computeWalkingRoute({
@@ -240,8 +436,8 @@ export async function reverseGeocode({
   const intersection = results.find((result) => result.types?.includes("intersection"));
 
   return {
-    streetName: route ? extractStreetName(route) || route.formatted_address || null : null,
-    nearestIntersection: intersection?.formatted_address || null
+    streetName: route ? cleanPlaceContextName(extractStreetName(route) || route.formatted_address) : null,
+    nearestIntersection: cleanPlaceContextName(intersection?.formatted_address)
   };
 }
 
@@ -422,4 +618,13 @@ function stripHtml(text) {
 function extractStreetName(result) {
   const route = result.address_components?.find((component) => component.types?.includes("route"));
   return route?.long_name || null;
+}
+
+function cleanPlaceContextName(value) {
+  const text = String(value || "").trim();
+  if (!text) return null;
+  if (/^unnamed(?:\s+road)?$/i.test(text)) return null;
+  if (/\bunnamed road\b/i.test(text)) return null;
+  if (/^-?\d+(?:\.\d+)?\s*,\s*-?\d+(?:\.\d+)?$/.test(text)) return null;
+  return text;
 }

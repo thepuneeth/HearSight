@@ -34,9 +34,9 @@ export function loadConfig(env = process.env) {
     mistralApiKey: env.MISTRAL_API_KEY || "",
     mistralModel: env.MISTRAL_MODEL || "mistral-medium-2505",
     useMocks: env.HEARSIGHT_USE_MOCKS === "true",
-    maxStages: Number(env.MAX_STAGES || 30),
-    checkpointSpacingMeters: Number(env.CHECKPOINT_SPACING_METERS || 50),
-    descriptionConcurrency: Number(env.DESCRIPTION_CONCURRENCY || 2)
+    maxStages: Number(env.MAX_STAGES || 12),
+    checkpointSpacingMeters: Number(env.CHECKPOINT_SPACING_METERS || 120),
+    descriptionConcurrency: Number(env.DESCRIPTION_CONCURRENCY || 5)
   };
 }
 
